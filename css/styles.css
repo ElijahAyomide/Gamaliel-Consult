@@ -11,7 +11,7 @@
   --serif: "Lora", Georgia, serif;
   --sans: "Inter", system-ui, sans-serif;
   --max: 1280px;
-  --pad: 6.72px;
+  --pad: 12.72px;
 }
 @media (min-width: 768px) { :root { --pad: 11.2px; } }
 
@@ -58,7 +58,7 @@ h1, h2, h3 { font-family: var(--serif); font-weight: 400; }
 .main-nav a:not(.btn) { font-size: 13px; padding-bottom: 4px; border-bottom: 2px solid transparent; transition: color .2s; }
 .main-nav a:not(.btn):hover { color: var(--gold); }
 .main-nav a.active { color: var(--gold); font-weight: 500; border-color: var(--gold); }
-.menu-toggle { width: 40px; height: 40px; display: flex; align-items: center; justify-content: center; border: 1px solid var(--line); background: #fff; cursor: pointer; }
+.menu-toggle { width: 40px; height: 40px; display: flex; align-items: center; justify-content: center; border: 1px solid var(--line); background: #fff; color: var(--gold); cursor: pointer; }
 .menu-toggle svg { width: 20px; height: 20px; fill: none; stroke: currentColor; stroke-width: 1.4; }
 .menu-toggle .icon-close { display: none; }
 .menu-toggle[aria-expanded="true"] .icon-open { display: none; }

@@ -1,0 +1,10 @@
+{
+  "name": "gamaliel-consult",
+  "version": "1.0.0",
+  "private": true,
+  "description": "Gamaliel Consult website. Content in /content is edited through /admin and built by build.js.",
+  "scripts": {
+    "build": "node build.js"
+  },
+  "engines": { "node": ">=18" }
+}

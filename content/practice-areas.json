@@ -1,0 +1,122 @@
+{
+  "seo_title": "Practice Areas | Gamaliel Consult",
+  "seo_description": "Corporate and commercial, dispute resolution, property, employment, family and regulatory advice. Focused expertise and connected thinking from Gamaliel Consult.",
+  "hero": {
+    "eyebrow": "Our practice areas",
+    "heading": "The right perspective.\nWhere it matters.",
+    "text": "From business-critical decisions to personal turning points, our advice brings the legal detail and your wider goals into focus.",
+    "link_label": "Find the support you need"
+  },
+  "help": {
+    "eyebrow": "How we can help",
+    "title": "Focused expertise.\nConnected thinking.",
+    "intro": "Your matter may touch more than one area of law. We look at the whole picture and bring the relevant perspectives together, so your advice remains connected."
+  },
+  "areas": [
+    {
+      "id": "corporate",
+      "icon": "building",
+      "title": "Corporate & commercial",
+      "text": "Practical legal support for the decisions that move your business forward, from formation to everyday operations and growth.",
+      "bullets": [
+        "Business formation & governance",
+        "Commercial contracts & negotiations",
+        "Transactions & business restructuring"
+      ]
+    },
+    {
+      "id": "disputes",
+      "icon": "scales",
+      "title": "Dispute resolution",
+      "text": "A clear-eyed assessment of your position, with a focus on proportionate strategies and constructive outcomes.",
+      "bullets": [
+        "Commercial & civil disputes",
+        "Negotiation & mediation",
+        "Litigation strategy & representation"
+      ]
+    },
+    {
+      "id": "property",
+      "icon": "columns",
+      "title": "Property & real estate",
+      "text": "Careful attention to the detail of property transactions, helping you understand your obligations before you commit.",
+      "bullets": [
+        "Acquisitions & disposals",
+        "Commercial & residential leases",
+        "Property due diligence"
+      ]
+    },
+    {
+      "id": "employment",
+      "icon": "briefcase",
+      "title": "Employment & workplace",
+      "text": "Balanced advice for employers and individuals navigating the working relationship and its changing demands.",
+      "bullets": [
+        "Employment contracts & policies",
+        "Workplace issues & grievances",
+        "Exits, settlements & employment disputes"
+      ]
+    },
+    {
+      "id": "family",
+      "icon": "users",
+      "title": "Family & private client",
+      "text": "Sensitive, considered guidance when personal circumstances change and important family decisions need to be made.",
+      "bullets": [
+        "Family arrangements & agreements",
+        "Estate planning & wills",
+        "Probate & estate administration"
+      ]
+    },
+    {
+      "id": "regulatory",
+      "icon": "shield",
+      "title": "Regulatory & compliance",
+      "text": "Helping your organisation understand its responsibilities, identify risk and build a more considered approach to compliance.",
+      "bullets": [
+        "Regulatory obligations & reviews",
+        "Internal policies & risk management",
+        "Compliance advice & ongoing support"
+      ]
+    }
+  ],
+  "area_link_label": "Discuss your matter",
+  "footnote": "The support available depends on your circumstances and the relevant jurisdiction. We will confirm suitability, scope and any limitations before accepting instructions.",
+  "next": {
+    "eyebrow": "Your next step",
+    "title": "You bring the question.\nWe help make sense of it.",
+    "steps": [
+      {
+        "title": "Listen first",
+        "text": "We take time to understand your circumstances, priorities and concerns."
+      },
+      {
+        "title": "Find the way forward",
+        "text": "We explain your options, the risks and a practical course of action."
+      },
+      {
+        "title": "Move with purpose",
+        "text": "We agree the scope and fees, then keep you informed as your matter progresses."
+      }
+    ]
+  },
+  "faq": {
+    "eyebrow": "A little clarity",
+    "title": "Before we begin.",
+    "intro": "A few things you may be wondering about working with us.",
+    "items": [
+      {
+        "question": "Which practice area is right for my matter?",
+        "answer": "You do not need to know the legal category. Tell us what is happening and we will help identify the support you need."
+      },
+      {
+        "question": "How are legal fees agreed?",
+        "answer": "We agree the scope and fees with you at the outset, so you know what to expect before any work begins."
+      },
+      {
+        "question": "Can you help before a dispute arises?",
+        "answer": "Yes. Early advice can often clarify your position and help resolve concerns before they escalate."
+      }
+    ]
+  }
+}

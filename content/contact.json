@@ -1,0 +1,73 @@
+{
+  "seo_title": "Contact Us | Gamaliel Consult",
+  "seo_description": "Tell us about your matter. Every matter starts with a conversation. Contact Gamaliel Consult to discuss how we may be able to help.",
+  "hero": {
+    "eyebrow": "Contact us",
+    "heading": "Let’s find your\nway forward.",
+    "text": "Every matter starts with a conversation. Tell us a little about your situation and we’ll be in touch to discuss how we may be able to help.",
+    "note": "Please do not include confidential documents or sensitive personal information in your initial enquiry."
+  },
+  "form": {
+    "title": "Tell us about your matter.",
+    "required_note": "Fields marked * are required.",
+    "disclaimer": "Submitting this form does not create a lawyer-client relationship. Any engagement is subject to a conflict check and our written terms.",
+    "practice_options": [
+      "Corporate & commercial",
+      "Dispute resolution",
+      "Property & real estate",
+      "Employment & workplace",
+      "Family & private client",
+      "Regulatory & compliance",
+      "Not sure yet"
+    ],
+    "success_message": "Thank you. Your message has been sent and we will be in touch soon."
+  },
+  "direct": {
+    "eyebrow": "A direct conversation",
+    "heading": "Prefer to speak\nto us directly?",
+    "whatsapp_text": "Chat with us on Whatsapp",
+    "meetings_title": "Meetings by appointment",
+    "meetings_text": "We can arrange an online conversation or discuss an in-person meeting when we respond to your enquiry.",
+    "next_title": "What happens next?",
+    "next_text": "We aim to respond within two working days. If a deadline is approaching, please make this clear in your message.",
+    "image": "images/contact-room.jpg",
+    "image_alt": "A meeting room with a long table and tall windows onto trees"
+  },
+  "expect": {
+    "eyebrow": "What to expect",
+    "title": "A clear process from the start.",
+    "steps": [
+      {
+        "title": "Listen first",
+        "text": "We take time to understand your circumstances, priorities and concerns."
+      },
+      {
+        "title": "Find the way forward",
+        "text": "We explain your options, the risks and a practical course of action."
+      },
+      {
+        "title": "Move with purpose",
+        "text": "We agree the scope and fees, then keep you informed as your matter progresses."
+      }
+    ]
+  },
+  "faq": {
+    "eyebrow": "Before you get in touch",
+    "title": "A few useful\nanswers.",
+    "intro": "For anything else, just ask. We’ll help you understand the next step.",
+    "items": [
+      {
+        "question": "What should I include in my enquiry?",
+        "answer": "A short outline of the matter, the people involved and any important dates is enough to begin. Please do not send confidential documents at this stage."
+      },
+      {
+        "question": "Can we meet remotely?",
+        "answer": "Yes. We can arrange an online conversation or an in-person meeting, whichever suits you best."
+      },
+      {
+        "question": "Does sending this form make me a client?",
+        "answer": "No. Sending this form does not create a lawyer-client relationship. Any engagement is subject to a conflict check and our written terms."
+      }
+    ]
+  }
+}

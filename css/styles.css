@@ -447,3 +447,13 @@ input:focus, select:focus, textarea:focus { border-color: var(--gold); outline: 
   .hero-stack h1 { font-size: clamp(44px, 4.2vw, 60px); }
   .br-m { display: none; }
 }
+
+/* ===== Additions for the editable version ===== */
+.cta .small-text a { text-decoration: underline; text-underline-offset: 3px; }
+.prose img { display: block; max-width: 100%; height: auto; margin: 32px 0; }
+.prose h3 { font-size: 20px; line-height: 1.35; margin: 32px 0 10px; }
+.prose ol { margin-top: 14px; padding-left: 22px; list-style: decimal; display: grid; gap: 10px; }
+.prose ol li { padding-left: 4px; font-size: 15px; line-height: 1.75; color: #55524C; }
+.prose ol li::before { content: none; }
+.pagination .page { font: inherit; font-size: 11px; cursor: pointer; padding: 0; }
+.pagination[hidden] { display: none; }

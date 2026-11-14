@@ -1,0 +1,18 @@
+{
+  "seo_title": "Legal Notice | Gamaliel Consult",
+  "seo_description": "Legal notice for the Gamaliel Consult website: firm details, general information disclaimer and terms of use.",
+  "hero": {
+    "eyebrow": "Legal notice",
+    "heading": "The terms of using\nthis website.",
+    "text": "Who we are, what this website is for and what it is not."
+  },
+  "updated": "Last updated: 10 November 2026",
+  "body": "This website is operated by Gamaliel Consult. By using it, you accept the terms of this notice.\n\n## 1. About the firm\n\nGamaliel Consult is a legal practice. Registered name: [Full registered name of the firm]. Registered address: [Add registered office address]. Registration number: [Add registration number, if applicable]. Email: [{{email}}](mailto:{{email}}).\n\n## 2. Regulation\n\n[Add the professional body or regulator that governs the firm and its lawyers, and any licence or practising certificate details.]\n\n## 3. General information, not legal advice\n\nThe content of this website, including the journal, is general information only. It is not legal advice and should not be relied on as such. The law and its application depend on the facts and the jurisdiction, so please seek advice about your own circumstances.\n\n## 4. No lawyer-client relationship\n\nVisiting this website, sending an enquiry or contacting us does not create a lawyer-client relationship. That relationship only begins once we have completed a conflict check and agreed our written terms of engagement with you. Until then, please do not send us confidential documents or sensitive personal information.\n\n## 5. Accuracy\n\nWe take care to keep this website accurate and up to date, but we give no warranty that its content is complete, current or error-free. Team profiles and portraits shown on this website may be illustrative.\n\n## 6. Intellectual property\n\nThe content, design, logo and images on this website belong to Gamaliel Consult or its licensors. You may view and print pages for your own personal use. You may not copy, reproduce or republish any part of the website for commercial purposes without our written permission.\n\n## 7. Links to other websites\n\nThis website may link to other websites. We do not control them and are not responsible for their content or privacy practices.\n\n## 8. Limitation of liability\n\nTo the fullest extent permitted by law, Gamaliel Consult is not liable for any loss arising from your use of, or reliance on, the content of this website. Nothing in this notice limits any liability that cannot be limited by law.\n\n## 9. Privacy\n\nOur [privacy policy](privacy.html) explains how we use personal information collected through this website.\n\n## 10. Governing law\n\nThis notice is governed by the laws of [Add jurisdiction], and the courts of that jurisdiction have exclusive authority over any dispute about it.",
+  "cta": {
+    "eyebrow": "Questions?",
+    "title": "We’re happy to help.",
+    "text": "Contact us at [{{email}}](mailto:{{email}}) and we’ll respond within two working days.",
+    "button_label": "Contact us",
+    "button_link": "contact.html"
+  }
+}

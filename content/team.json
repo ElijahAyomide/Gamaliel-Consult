@@ -1,0 +1,40 @@
+{
+  "members": [
+    {
+      "name": "Sample Attorney 01",
+      "role": "Senior Associate",
+      "image": "images/team-1.jpg",
+      "short_bio": "Sample Attorney helps clients navigate commercial contracts, disputes and strategic decisions with practical, considered advice.",
+      "long_bio": "A practical approach to commercial contracts, business disputes and strategic decisions. Clear explanations help clients weigh their options and choose a considered next step.",
+      "focus": "Commercial contracts, disputes and strategic decision-making",
+      "link": "about.html#team"
+    },
+    {
+      "name": "Sample Attorney 02",
+      "role": "Associate",
+      "image": "images/team-2.jpg",
+      "short_bio": "Sample Attorney advises on property, real estate and commercial matters with a focus on clarity, timing and practical outcomes.",
+      "long_bio": "A thoughtful approach to property, real estate and commercial matters. Advice connects legal detail with timing, risk and the practical priorities behind every transaction.",
+      "focus": "Property, real estate and commercial matters",
+      "link": "about.html#team"
+    },
+    {
+      "name": "Sample Attorney 03",
+      "role": "Counsel",
+      "image": "images/team-3.jpg",
+      "short_bio": "Sample Attorney supports clients through complex disputes, negotiations and strategic legal decisions with a calm, measured approach.",
+      "long_bio": "Calm, measured support through complex disputes and negotiations. A focus on understanding competing priorities helps clients evaluate options and work toward resolution.",
+      "focus": "Complex disputes, negotiations and strategic legal decisions",
+      "link": "about.html#team"
+    },
+    {
+      "name": "Sample Attorney 04",
+      "role": "Associate",
+      "image": "images/team-4.jpg",
+      "short_bio": "Sample Attorney advises on estate and commercial matters with a focus on clarity, timing and practical outcomes.",
+      "long_bio": "A thoughtful approach to estate and commercial matters, with advice that connects legal detail with timing, risk and practical priorities.",
+      "focus": "Estate and commercial matters",
+      "link": "about.html#team"
+    }
+  ]
+}

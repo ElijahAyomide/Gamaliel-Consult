@@ -1,0 +1,18 @@
+{
+  "email": "hello@gamalielconsult.com",
+  "phone": "08145686089",
+  "phone_for_tap_to_call": "+2348145686089",
+  "whatsapp_number": "2348145686089",
+  "linkedin_url": "",
+  "address": "",
+  "footer_tagline": "Thoughtful counsel. Clear direction. Legal advice shaped around your business and your life.",
+  "footer_lines": "By appointment\nIn person or online",
+  "header_button_label": "Book a consultation",
+  "cta": {
+    "eyebrow": "Let’s talk",
+    "title": "The right advice starts with a conversation.",
+    "text": "Tell us what matters. We’ll help you understand your next step.",
+    "button_label": "Book a consultation",
+    "button_link": "contact.html"
+  }
+}

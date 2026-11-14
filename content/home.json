@@ -1,0 +1,100 @@
+{
+  "seo_title": "Gamaliel Consult | Legal Counsel",
+  "seo_description": "Thoughtful legal advice for businesses, individuals and the decisions that matter. Gamaliel Consult turns complex questions into a clear way forward.",
+  "hero": {
+    "eyebrow": "Gamaliel Consult · Legal Counsel",
+    "heading": "Clarity for today. Confidence for what comes next.",
+    "text": "Thoughtful legal advice for businesses, individuals and the decisions that matter. We turn complex questions into a clear way forward.",
+    "button_label": "Book a consultation",
+    "button_link": "contact.html",
+    "note": "Considered advice. Personal attention.",
+    "image": "images/hero.jpg",
+    "image_alt": "Stone courthouse building at dusk",
+    "caption": "A clearer perspective"
+  },
+  "perspective": {
+    "eyebrow": "Our perspective",
+    "title": "Good counsel begins with understanding.",
+    "text": "Legal matters rarely exist in isolation. They affect your plans, your relationships and your peace of mind. At Gamaliel Consult, we start with the bigger picture — then focus on the detail that makes a difference.",
+    "link_label": "Get to know our firm",
+    "link": "about.html"
+  },
+  "practice": {
+    "eyebrow": "Our practice areas",
+    "title": "Advice that meets you where you are.",
+    "link_label": "Explore all practice areas",
+    "link": "practice-areas.html",
+    "card_link_label": "Learn more",
+    "cards": [
+      {
+        "icon": "building",
+        "title": "Corporate & commercial",
+        "text": "From everyday contracts to strategic transactions, clear advice for your next business decision.",
+        "link": "practice-areas.html#corporate"
+      },
+      {
+        "icon": "scales",
+        "title": "Dispute resolution",
+        "text": "A measured approach to protecting your position and finding a constructive resolution.",
+        "link": "practice-areas.html#disputes"
+      },
+      {
+        "icon": "columns",
+        "title": "Property & real estate",
+        "text": "Careful guidance through the legal detail of buying, selling, leasing and developing property.",
+        "link": "practice-areas.html#property"
+      }
+    ]
+  },
+  "founder": {
+    "eyebrow": "The founder",
+    "title": "A steady perspective for the decisions that matter.",
+    "intro": "Gamaliel Consult was built on the idea that thoughtful legal counsel should be clear, practical and personal. Meet the founder behind the firm.",
+    "name": "Sample Founder",
+    "role": "Founder & Principal",
+    "image": "images/founder.jpg",
+    "image_alt": "Sample Founder",
+    "bio": "With a background in corporate, commercial and dispute work, the founder helps clients move from uncertainty to a clearer next step. His approach is built on listening carefully, explaining options plainly and advising with a long-term view.",
+    "focus_label": "Focus areas",
+    "tags": [
+      "Property & Real Estate",
+      "Corporate strategy",
+      "Commercial guidance",
+      "Dispute resolution"
+    ],
+    "link_label": "Learn more about the firm",
+    "link": "about.html"
+  },
+  "team": {
+    "eyebrow": "Meet our attorneys",
+    "title": "A team designed to help you move forward with confidence.",
+    "intro": "Practical judgment. Clear communication. A shared commitment to helping you move forward. Team profiles and portraits are illustrative.",
+    "profile_link_label": "View profile"
+  },
+  "approach": {
+    "eyebrow": "A considered approach",
+    "title": "Less uncertainty. More direction.",
+    "intro": "From the first conversation to the next decision, you should know where you stand.",
+    "steps": [
+      {
+        "title": "Listen first",
+        "text": "We take time to understand your circumstances, priorities and concerns."
+      },
+      {
+        "title": "Find the way forward",
+        "text": "We explain your options, the risks and a practical course of action."
+      },
+      {
+        "title": "Move with purpose",
+        "text": "We agree the scope and fees, then keep you informed as your matter progresses."
+      }
+    ]
+  },
+  "journal": {
+    "eyebrow": "From our journal",
+    "title": "A more informed perspective.",
+    "link_label": "Visit the blog",
+    "link": "blog.html",
+    "read_label": "Read insight"
+  }
+}

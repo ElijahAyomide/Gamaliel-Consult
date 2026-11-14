@@ -1,0 +1,74 @@
+{
+  "seo_title": "About Us | Gamaliel Consult",
+  "seo_description": "Gamaliel Consult is a legal practice built around a simple idea: good advice should make a complex situation easier to understand. Meet the firm and its attorneys.",
+  "hero": {
+    "eyebrow": "About us",
+    "heading": "A thoughtful partner.\nA clearer path.",
+    "text": "We believe legal advice should give you perspective, not just an answer. Our role is to understand what matters to you — and help you move forward with purpose."
+  },
+  "team": {
+    "eyebrow": "Meet our attorneys",
+    "title": "A team designed to help you move forward with confidence.",
+    "intro": "Practical judgment. Clear communication. A shared commitment to helping you move forward. Meet the people who bring a considered perspective to each matter.",
+    "mobile_note": "Illustrative team profiles and portraits — replace with your firm’s details.",
+    "footnote": "Sample team identities and portrait images are illustrative only and should be replaced with final attorney names, roles and photography.",
+    "focus_label": "Practice focus:",
+    "profile_link_label": "View profile"
+  },
+  "firm": {
+    "eyebrow": "The firm",
+    "title": "The law is our discipline.\nPeople are our focus.",
+    "lead": "Gamaliel Consult is a legal practice built around a simple idea: good advice should make a complex situation easier to understand.",
+    "paragraphs": [
+      "We work with businesses and individuals on matters that shape their future. Whether you are negotiating an agreement, managing a dispute or planning a significant change, we bring careful analysis and practical thinking to the conversation.",
+      "Our advice is grounded in your circumstances. We listen closely, explain the choices and work with you to identify a proportionate way forward."
+    ],
+    "link_label": "Explore our practice areas",
+    "link": "practice-areas.html"
+  },
+  "principles": {
+    "eyebrow": "What guides us",
+    "title": "Principles you can feel\nin the way we work.",
+    "items": [
+      {
+        "title": "Clarity, always",
+        "text": "We explain the legal position in plain language, so you can make informed decisions without unnecessary complexity."
+      },
+      {
+        "title": "Judgment with purpose",
+        "text": "We balance legal detail with practical realities, keeping your priorities and the bigger picture in view."
+      },
+      {
+        "title": "Respect for your trust",
+        "text": "We treat your matter with care, communicate thoughtfully and approach sensitive information with discretion."
+      }
+    ]
+  },
+  "working": {
+    "eyebrow": "Working together",
+    "title": "Personal attention.\nShared understanding.",
+    "image": "images/boardroom.jpg",
+    "image_alt": "A quiet meeting room with large windows onto trees",
+    "text": "You should never feel removed from your own matter. We make space for questions, agree how we will work together and keep the conversation focused on the decisions ahead.",
+    "quote": "The best way forward starts with understanding what matters most.",
+    "cite": "The Gamaliel Consult approach"
+  },
+  "expect": {
+    "eyebrow": "What to expect",
+    "title": "A clear beginning. A considered next step.",
+    "steps": [
+      {
+        "title": "Listen first",
+        "text": "We take time to understand your circumstances, priorities and concerns."
+      },
+      {
+        "title": "Find the way forward",
+        "text": "We explain your options, the risks and a practical course of action."
+      },
+      {
+        "title": "Move with purpose",
+        "text": "We agree the scope and fees, then keep you informed as your matter progresses."
+      }
+    ]
+  }
+}

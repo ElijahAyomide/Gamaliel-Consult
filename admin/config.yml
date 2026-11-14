@@ -1,0 +1,1236 @@
+# Decap CMS configuration for the Gamaliel Consult admin (/admin).
+# Editors sign in through Decap Turbo (email + password). See README.md for the one-time setup.
+backend:
+  name: turbo-github
+  turbo_site_id: YOUR_TURBO_SITE_ID   # <- replace with the Site ID from turbo.decapcms.org
+
+media_folder: images/uploads
+public_folder: /images/uploads
+logo_url: /images/logo.png
+locale: en
+
+collections:
+  - name: posts
+    label: "Blog posts"
+    label_singular: "Blog post"
+    folder: content/posts
+    create: true
+    extension: md
+    format: frontmatter
+    slug: "{{slug}}"
+    summary: "{{title}} · {{date}}"
+    sortable_fields: [date, title]
+    view_filters:
+      - {label: "Drafts", field: draft, pattern: true}
+    fields:
+      - {label: "Title", name: title, widget: string}
+      - {label: "Date", name: date, widget: datetime, format: "YYYY-MM-DD", date_format: "YYYY-MM-DD", time_format: false, picker_utc: true}
+      - label: "Category label"
+        name: category
+        widget: select
+        options: ["Corporate & commercial", "Dispute resolution", "Property & real estate", "Employment & workplace", "Family & private client", "Regulatory & compliance"]
+        hint: "The small gold label above the title."
+      - label: "Filter group"
+        name: topic
+        widget: select
+        options: ["Business", "Disputes", "Property", "Private client"]
+        hint: "Which filter button on the Blog page shows this post."
+      - {label: "Reading time", name: read_time, widget: string, hint: "For example: 5 min read"}
+      - {label: "Short summary", name: excerpt, widget: text, hint: "One or two sentences shown on the post cards and in Google results."}
+      - {label: "Cover image", name: image, widget: image, hint: "Landscape photo, at least 1200 px wide."}
+      - {label: "Cover image description", name: image_alt, widget: string, required: false, hint: "Short description for screen readers."}
+      - {label: "Featured post", name: featured, widget: boolean, default: false, required: false, hint: "The featured post appears in the large panel at the top of the Blog page. Only one post should be featured."}
+      - {label: "Draft (hide from website)", name: draft, widget: boolean, default: false, required: false}
+      - {label: "Article text", name: body, widget: markdown, hint: "Write the article here. The first paragraph is shown slightly larger. Use Heading 2 for section titles."}
+
+  - name: settings
+    label: "Contact details & site settings"
+    files:
+      - name: settings
+        label: "Contact details, footer & call-to-action"
+        file: content/settings.json
+        format: json
+        fields:
+          - label: "Email"
+            name: email
+            widget: string
+            required: false
+            hint: "Shown on the Contact page and in the footer. (Messages sent through the contact form are emailed to the address set in Netlify, see the README.)"
+          - label: "Phone"
+            name: phone
+            widget: string
+            required: false
+            hint: "Shown on the Contact page, e.g. 08145686089."
+          - label: "Phone for tap to call"
+            name: phone_for_tap_to_call
+            widget: string
+            required: false
+            hint: "International format, e.g. +2348145686089. Leave empty to use the phone number above."
+          - label: "Whatsapp number"
+            name: whatsapp_number
+            widget: string
+            required: false
+            hint: "Digits only with the country code, e.g. 2348145686089 (no + sign or spaces)."
+          - label: "Linkedin url"
+            name: linkedin_url
+            widget: string
+            required: false
+            hint: "Full address of your LinkedIn page. Leave empty to hide the LinkedIn link in the footer."
+          - label: "Address"
+            name: address
+            widget: text
+            required: false
+            hint: "Optional. Shown in the footer when filled in."
+          - label: "Footer tagline"
+            name: footer_tagline
+            widget: text
+            required: false
+          - label: "Footer lines"
+            name: footer_lines
+            widget: text
+            required: false
+            hint: "Press Enter for a new line."
+          - label: "Header button label"
+            name: header_button_label
+            widget: string
+            required: false
+          - label: "Cta"
+            name: cta
+            widget: object
+            collapsed: true
+            fields:
+              - label: "Eyebrow"
+                name: eyebrow
+                widget: string
+                required: false
+              - label: "Title"
+                name: title
+                widget: text
+                required: false
+                hint: "Press Enter to start a new line."
+              - label: "Text"
+                name: text
+                widget: text
+                required: false
+              - label: "Button label"
+                name: button_label
+                widget: string
+                required: false
+              - label: "Button link"
+                name: button_link
+                widget: string
+                required: false
+                hint: "Where the button goes: another page (e.g. contact.html) or a full web address."
+
+  - name: pages
+    label: "Pages"
+    files:
+      - name: home
+        label: "Home page"
+        file: content/home.json
+        format: json
+        fields:
+          - label: "Seo title"
+            name: seo_title
+            widget: string
+            required: false
+            hint: "The title shown on the browser tab and in Google results."
+          - label: "Seo description"
+            name: seo_description
+            widget: text
+            required: false
+            hint: "The short description shown under the title in Google results (about 150 characters)."
+          - label: "Hero"
+            name: hero
+            widget: object
+            collapsed: true
+            fields:
+              - label: "Eyebrow"
+                name: eyebrow
+                widget: string
+                required: false
+              - label: "Heading"
+                name: heading
+                widget: text
+                required: false
+                hint: "Press Enter to start a new line. The line break only shows on large screens."
+              - label: "Text"
+                name: text
+                widget: text
+                required: false
+              - label: "Button label"
+                name: button_label
+                widget: string
+                required: false
+              - label: "Button link"
+                name: button_link
+                widget: string
+                required: false
+                hint: "Where the button goes: another page (e.g. contact.html) or a full web address."
+              - label: "Note"
+                name: note
+                widget: text
+                required: false
+              - label: "Image"
+                name: image
+                widget: image
+                required: false
+                hint: "Upload a photo. Landscape photos at least 1200 px wide look best."
+              - label: "Image alt"
+                name: image_alt
+                widget: string
+                required: false
+                hint: "A short description of the photo for people using screen readers."
+              - label: "Caption"
+                name: caption
+                widget: text
+                required: false
+          - label: "Perspective"
+            name: perspective
+            widget: object
+            collapsed: true
+            fields:
+              - label: "Eyebrow"
+                name: eyebrow
+                widget: string
+                required: false
+              - label: "Title"
+                name: title
+                widget: text
+                required: false
+                hint: "Press Enter to start a new line."
+              - label: "Text"
+                name: text
+                widget: text
+                required: false
+              - label: "Link label"
+                name: link_label
+                widget: string
+                required: false
+              - label: "Link"
+                name: link
+                widget: string
+                required: false
+                hint: "Where the link goes: another page (e.g. contact.html) or a full web address (https://...)."
+          - label: "Practice"
+            name: practice
+            widget: object
+            collapsed: true
+            fields:
+              - label: "Eyebrow"
+                name: eyebrow
+                widget: string
+                required: false
+              - label: "Title"
+                name: title
+                widget: text
+                required: false
+                hint: "Press Enter to start a new line."
+              - label: "Link label"
+                name: link_label
+                widget: string
+                required: false
+              - label: "Link"
+                name: link
+                widget: string
+                required: false
+                hint: "Where the link goes: another page (e.g. contact.html) or a full web address (https://...)."
+              - label: "Card link label"
+                name: card_link_label
+                widget: string
+                required: false
+              - label: "Cards"
+                name: cards
+                widget: list
+                collapsed: true
+                required: false
+                summary: "{{fields.title}}"
+                fields:
+                  - label: "Icon"
+                    name: icon
+                    widget: select
+                    options: ["building", "scales", "columns", "briefcase", "users", "shield"]
+                    required: false
+                    hint: "Pick the small icon shown on the card."
+                  - label: "Title"
+                    name: title
+                    widget: text
+                    required: false
+                    hint: "Press Enter to start a new line."
+                  - label: "Text"
+                    name: text
+                    widget: text
+                    required: false
+                  - label: "Link"
+                    name: link
+                    widget: string
+                    required: false
+                    hint: "Where the link goes: another page (e.g. contact.html) or a full web address (https://...)."
+          - label: "Founder"
+            name: founder
+            widget: object
+            collapsed: true
+            fields:
+              - label: "Eyebrow"
+                name: eyebrow
+                widget: string
+                required: false
+              - label: "Title"
+                name: title
+                widget: text
+                required: false
+                hint: "Press Enter to start a new line."
+              - label: "Intro"
+                name: intro
+                widget: text
+                required: false
+              - label: "Name"
+                name: name
+                widget: string
+                required: false
+              - label: "Role"
+                name: role
+                widget: string
+                required: false
+              - label: "Image"
+                name: image
+                widget: image
+                required: false
+                hint: "Upload a photo. Landscape photos at least 1200 px wide look best."
+              - label: "Image alt"
+                name: image_alt
+                widget: string
+                required: false
+                hint: "A short description of the photo for people using screen readers."
+              - label: "Bio"
+                name: bio
+                widget: text
+                required: false
+              - label: "Focus label"
+                name: focus_label
+                widget: string
+                required: false
+              - label: "Tags"
+                name: tags
+                widget: list
+                collapsed: true
+                required: false
+                field: {label: "Item", name: item, widget: string}
+              - label: "Link label"
+                name: link_label
+                widget: string
+                required: false
+              - label: "Link"
+                name: link
+                widget: string
+                required: false
+                hint: "Where the link goes: another page (e.g. contact.html) or a full web address (https://...)."
+          - label: "Team"
+            name: team
+            widget: object
+            collapsed: true
+            fields:
+              - label: "Eyebrow"
+                name: eyebrow
+                widget: string
+                required: false
+              - label: "Title"
+                name: title
+                widget: text
+                required: false
+                hint: "Press Enter to start a new line."
+              - label: "Intro"
+                name: intro
+                widget: text
+                required: false
+              - label: "Profile link label"
+                name: profile_link_label
+                widget: string
+                required: false
+          - label: "Approach"
+            name: approach
+            widget: object
+            collapsed: true
+            fields:
+              - label: "Eyebrow"
+                name: eyebrow
+                widget: string
+                required: false
+              - label: "Title"
+                name: title
+                widget: text
+                required: false
+                hint: "Press Enter to start a new line."
+              - label: "Intro"
+                name: intro
+                widget: text
+                required: false
+              - label: "Steps"
+                name: steps
+                widget: list
+                collapsed: true
+                required: false
+                summary: "{{fields.title}}"
+                fields:
+                  - label: "Title"
+                    name: title
+                    widget: text
+                    required: false
+                    hint: "Press Enter to start a new line."
+                  - label: "Text"
+                    name: text
+                    widget: text
+                    required: false
+          - label: "Journal"
+            name: journal
+            widget: object
+            collapsed: true
+            fields:
+              - label: "Eyebrow"
+                name: eyebrow
+                widget: string
+                required: false
+              - label: "Title"
+                name: title
+                widget: text
+                required: false
+                hint: "Press Enter to start a new line."
+              - label: "Link label"
+                name: link_label
+                widget: string
+                required: false
+              - label: "Link"
+                name: link
+                widget: string
+                required: false
+                hint: "Where the link goes: another page (e.g. contact.html) or a full web address (https://...)."
+              - label: "Read label"
+                name: read_label
+                widget: string
+                required: false
+      - name: about
+        label: "About Us page"
+        file: content/about.json
+        format: json
+        fields:
+          - label: "Seo title"
+            name: seo_title
+            widget: string
+            required: false
+            hint: "The title shown on the browser tab and in Google results."
+          - label: "Seo description"
+            name: seo_description
+            widget: text
+            required: false
+            hint: "The short description shown under the title in Google results (about 150 characters)."
+          - label: "Hero"
+            name: hero
+            widget: object
+            collapsed: true
+            fields:
+              - label: "Eyebrow"
+                name: eyebrow
+                widget: string
+                required: false
+              - label: "Heading"
+                name: heading
+                widget: text
+                required: false
+                hint: "Press Enter to start a new line. The line break only shows on large screens."
+              - label: "Text"
+                name: text
+                widget: text
+                required: false
+          - label: "Team"
+            name: team
+            widget: object
+            collapsed: true
+            fields:
+              - label: "Eyebrow"
+                name: eyebrow
+                widget: string
+                required: false
+              - label: "Title"
+                name: title
+                widget: text
+                required: false
+                hint: "Press Enter to start a new line."
+              - label: "Intro"
+                name: intro
+                widget: text
+                required: false
+              - label: "Mobile note"
+                name: mobile_note
+                widget: string
+                required: false
+                hint: "Shown only on phones. Leave empty to hide it."
+              - label: "Footnote"
+                name: footnote
+                widget: text
+                required: false
+                hint: "Leave empty to hide it."
+              - label: "Focus label"
+                name: focus_label
+                widget: string
+                required: false
+              - label: "Profile link label"
+                name: profile_link_label
+                widget: string
+                required: false
+          - label: "Firm"
+            name: firm
+            widget: object
+            collapsed: true
+            fields:
+              - label: "Eyebrow"
+                name: eyebrow
+                widget: string
+                required: false
+              - label: "Title"
+                name: title
+                widget: text
+                required: false
+                hint: "Press Enter to start a new line."
+              - label: "Lead"
+                name: lead
+                widget: text
+                required: false
+              - label: "Paragraphs"
+                name: paragraphs
+                widget: list
+                collapsed: true
+                required: false
+                field: {label: "Item", name: item, widget: text}
+              - label: "Link label"
+                name: link_label
+                widget: string
+                required: false
+              - label: "Link"
+                name: link
+                widget: string
+                required: false
+                hint: "Where the link goes: another page (e.g. contact.html) or a full web address (https://...)."
+          - label: "Principles"
+            name: principles
+            widget: object
+            collapsed: true
+            fields:
+              - label: "Eyebrow"
+                name: eyebrow
+                widget: string
+                required: false
+              - label: "Title"
+                name: title
+                widget: text
+                required: false
+                hint: "Press Enter to start a new line."
+              - label: "Items"
+                name: items
+                widget: list
+                collapsed: true
+                required: false
+                summary: "{{fields.title}}"
+                fields:
+                  - label: "Title"
+                    name: title
+                    widget: text
+                    required: false
+                    hint: "Press Enter to start a new line."
+                  - label: "Text"
+                    name: text
+                    widget: text
+                    required: false
+          - label: "Working"
+            name: working
+            widget: object
+            collapsed: true
+            fields:
+              - label: "Eyebrow"
+                name: eyebrow
+                widget: string
+                required: false
+              - label: "Title"
+                name: title
+                widget: text
+                required: false
+                hint: "Press Enter to start a new line."
+              - label: "Image"
+                name: image
+                widget: image
+                required: false
+                hint: "Upload a photo. Landscape photos at least 1200 px wide look best."
+              - label: "Image alt"
+                name: image_alt
+                widget: string
+                required: false
+                hint: "A short description of the photo for people using screen readers."
+              - label: "Text"
+                name: text
+                widget: text
+                required: false
+              - label: "Quote"
+                name: quote
+                widget: text
+                required: false
+                hint: "Quotation marks are added automatically."
+              - label: "Cite"
+                name: cite
+                widget: string
+                required: false
+          - label: "Expect"
+            name: expect
+            widget: object
+            collapsed: true
+            fields:
+              - label: "Eyebrow"
+                name: eyebrow
+                widget: string
+                required: false
+              - label: "Title"
+                name: title
+                widget: text
+                required: false
+                hint: "Press Enter to start a new line."
+              - label: "Steps"
+                name: steps
+                widget: list
+                collapsed: true
+                required: false
+                summary: "{{fields.title}}"
+                fields:
+                  - label: "Title"
+                    name: title
+                    widget: text
+                    required: false
+                    hint: "Press Enter to start a new line."
+                  - label: "Text"
+                    name: text
+                    widget: text
+                    required: false
+      - name: practice_areas
+        label: "Practice Areas page"
+        file: content/practice-areas.json
+        format: json
+        fields:
+          - label: "Seo title"
+            name: seo_title
+            widget: string
+            required: false
+            hint: "The title shown on the browser tab and in Google results."
+          - label: "Seo description"
+            name: seo_description
+            widget: text
+            required: false
+            hint: "The short description shown under the title in Google results (about 150 characters)."
+          - label: "Hero"
+            name: hero
+            widget: object
+            collapsed: true
+            fields:
+              - label: "Eyebrow"
+                name: eyebrow
+                widget: string
+                required: false
+              - label: "Heading"
+                name: heading
+                widget: text
+                required: false
+                hint: "Press Enter to start a new line. The line break only shows on large screens."
+              - label: "Text"
+                name: text
+                widget: text
+                required: false
+              - label: "Link label"
+                name: link_label
+                widget: string
+                required: false
+          - label: "Help"
+            name: help
+            widget: object
+            collapsed: true
+            fields:
+              - label: "Eyebrow"
+                name: eyebrow
+                widget: string
+                required: false
+              - label: "Title"
+                name: title
+                widget: text
+                required: false
+                hint: "Press Enter to start a new line."
+              - label: "Intro"
+                name: intro
+                widget: text
+                required: false
+          - label: "Areas"
+            name: areas
+            widget: list
+            collapsed: true
+            required: false
+            summary: "{{fields.title}}"
+            fields:
+              - label: "Id"
+                name: id
+                widget: string
+                required: false
+                hint: "Short word used in the page address, e.g. corporate. Do not change this unless you also update links to it."
+              - label: "Icon"
+                name: icon
+                widget: select
+                options: ["building", "scales", "columns", "briefcase", "users", "shield"]
+                required: false
+                hint: "Pick the small icon shown on the card."
+              - label: "Title"
+                name: title
+                widget: text
+                required: false
+                hint: "Press Enter to start a new line."
+              - label: "Text"
+                name: text
+                widget: text
+                required: false
+              - label: "Bullets"
+                name: bullets
+                widget: list
+                collapsed: true
+                required: false
+                field: {label: "Item", name: item, widget: string}
+          - label: "Area link label"
+            name: area_link_label
+            widget: string
+            required: false
+          - label: "Footnote"
+            name: footnote
+            widget: text
+            required: false
+            hint: "Leave empty to hide it."
+          - label: "Next"
+            name: next
+            widget: object
+            collapsed: true
+            fields:
+              - label: "Eyebrow"
+                name: eyebrow
+                widget: string
+                required: false
+              - label: "Title"
+                name: title
+                widget: text
+                required: false
+                hint: "Press Enter to start a new line."
+              - label: "Steps"
+                name: steps
+                widget: list
+                collapsed: true
+                required: false
+                summary: "{{fields.title}}"
+                fields:
+                  - label: "Title"
+                    name: title
+                    widget: text
+                    required: false
+                    hint: "Press Enter to start a new line."
+                  - label: "Text"
+                    name: text
+                    widget: text
+                    required: false
+          - label: "Faq"
+            name: faq
+            widget: object
+            collapsed: true
+            fields:
+              - label: "Eyebrow"
+                name: eyebrow
+                widget: string
+                required: false
+              - label: "Title"
+                name: title
+                widget: text
+                required: false
+                hint: "Press Enter to start a new line."
+              - label: "Intro"
+                name: intro
+                widget: text
+                required: false
+              - label: "Items"
+                name: items
+                widget: list
+                collapsed: true
+                required: false
+                summary: "{{fields.question}}"
+                fields:
+                  - label: "Question"
+                    name: question
+                    widget: string
+                    required: false
+                  - label: "Answer"
+                    name: answer
+                    widget: text
+                    required: false
+      - name: contact
+        label: "Contact Us page"
+        file: content/contact.json
+        format: json
+        fields:
+          - label: "Seo title"
+            name: seo_title
+            widget: string
+            required: false
+            hint: "The title shown on the browser tab and in Google results."
+          - label: "Seo description"
+            name: seo_description
+            widget: text
+            required: false
+            hint: "The short description shown under the title in Google results (about 150 characters)."
+          - label: "Hero"
+            name: hero
+            widget: object
+            collapsed: true
+            fields:
+              - label: "Eyebrow"
+                name: eyebrow
+                widget: string
+                required: false
+              - label: "Heading"
+                name: heading
+                widget: text
+                required: false
+                hint: "Press Enter to start a new line. The line break only shows on large screens."
+              - label: "Text"
+                name: text
+                widget: text
+                required: false
+              - label: "Note"
+                name: note
+                widget: text
+                required: false
+          - label: "Form"
+            name: form
+            widget: object
+            collapsed: true
+            fields:
+              - label: "Title"
+                name: title
+                widget: text
+                required: false
+                hint: "Press Enter to start a new line."
+              - label: "Required note"
+                name: required_note
+                widget: string
+                required: false
+              - label: "Disclaimer"
+                name: disclaimer
+                widget: text
+                required: false
+              - label: "Practice options"
+                name: practice_options
+                widget: list
+                collapsed: true
+                required: false
+                field: {label: "Item", name: item, widget: string}
+              - label: "Success message"
+                name: success_message
+                widget: string
+                required: false
+          - label: "Direct"
+            name: direct
+            widget: object
+            collapsed: true
+            fields:
+              - label: "Eyebrow"
+                name: eyebrow
+                widget: string
+                required: false
+              - label: "Heading"
+                name: heading
+                widget: text
+                required: false
+                hint: "Press Enter to start a new line. The line break only shows on large screens."
+              - label: "Whatsapp text"
+                name: whatsapp_text
+                widget: string
+                required: false
+              - label: "Meetings title"
+                name: meetings_title
+                widget: string
+                required: false
+              - label: "Meetings text"
+                name: meetings_text
+                widget: text
+                required: false
+              - label: "Next title"
+                name: next_title
+                widget: string
+                required: false
+              - label: "Next text"
+                name: next_text
+                widget: text
+                required: false
+              - label: "Image"
+                name: image
+                widget: image
+                required: false
+                hint: "Upload a photo. Landscape photos at least 1200 px wide look best."
+              - label: "Image alt"
+                name: image_alt
+                widget: string
+                required: false
+                hint: "A short description of the photo for people using screen readers."
+          - label: "Expect"
+            name: expect
+            widget: object
+            collapsed: true
+            fields:
+              - label: "Eyebrow"
+                name: eyebrow
+                widget: string
+                required: false
+              - label: "Title"
+                name: title
+                widget: text
+                required: false
+                hint: "Press Enter to start a new line."
+              - label: "Steps"
+                name: steps
+                widget: list
+                collapsed: true
+                required: false
+                summary: "{{fields.title}}"
+                fields:
+                  - label: "Title"
+                    name: title
+                    widget: text
+                    required: false
+                    hint: "Press Enter to start a new line."
+                  - label: "Text"
+                    name: text
+                    widget: text
+                    required: false
+          - label: "Faq"
+            name: faq
+            widget: object
+            collapsed: true
+            fields:
+              - label: "Eyebrow"
+                name: eyebrow
+                widget: string
+                required: false
+              - label: "Title"
+                name: title
+                widget: text
+                required: false
+                hint: "Press Enter to start a new line."
+              - label: "Intro"
+                name: intro
+                widget: text
+                required: false
+              - label: "Items"
+                name: items
+                widget: list
+                collapsed: true
+                required: false
+                summary: "{{fields.question}}"
+                fields:
+                  - label: "Question"
+                    name: question
+                    widget: string
+                    required: false
+                  - label: "Answer"
+                    name: answer
+                    widget: text
+                    required: false
+      - name: blog
+        label: "Blog page and post layout"
+        file: content/blog.json
+        format: json
+        fields:
+          - label: "Seo title"
+            name: seo_title
+            widget: string
+            required: false
+            hint: "The title shown on the browser tab and in Google results."
+          - label: "Seo description"
+            name: seo_description
+            widget: text
+            required: false
+            hint: "The short description shown under the title in Google results (about 150 characters)."
+          - label: "Hero"
+            name: hero
+            widget: object
+            collapsed: true
+            fields:
+              - label: "Eyebrow"
+                name: eyebrow
+                widget: string
+                required: false
+              - label: "Heading"
+                name: heading
+                widget: text
+                required: false
+                hint: "Press Enter to start a new line. The line break only shows on large screens."
+              - label: "Text"
+                name: text
+                widget: text
+                required: false
+          - label: "Featured label"
+            name: featured_label
+            widget: string
+            required: false
+          - label: "Featured link label"
+            name: featured_link_label
+            widget: string
+            required: false
+          - label: "List title"
+            name: list_title
+            widget: string
+            required: false
+          - label: "Filters"
+            name: filters
+            widget: list
+            collapsed: true
+            required: false
+            field: {label: "Item", name: item, widget: string}
+          - label: "Footnote"
+            name: footnote
+            widget: text
+            required: false
+            hint: "Leave empty to hide it."
+          - label: "No results"
+            name: no_results
+            widget: string
+            required: false
+          - label: "Newsletter"
+            name: newsletter
+            widget: object
+            collapsed: true
+            fields:
+              - label: "Eyebrow"
+                name: eyebrow
+                widget: string
+                required: false
+              - label: "Title"
+                name: title
+                widget: text
+                required: false
+                hint: "Press Enter to start a new line."
+              - label: "Text"
+                name: text
+                widget: text
+                required: false
+              - label: "Button label"
+                name: button_label
+                widget: string
+                required: false
+              - label: "Note"
+                name: note
+                widget: text
+                required: false
+          - label: "Post"
+            name: post
+            widget: object
+            collapsed: true
+            fields:
+              - label: "Article note"
+                name: article_note
+                widget: text
+                required: false
+              - label: "More eyebrow"
+                name: more_eyebrow
+                widget: string
+                required: false
+              - label: "More title"
+                name: more_title
+                widget: string
+                required: false
+              - label: "More link label"
+                name: more_link_label
+                widget: string
+                required: false
+              - label: "Back label"
+                name: back_label
+                widget: string
+                required: false
+      - name: privacy
+        label: "Privacy policy"
+        file: content/privacy.json
+        format: json
+        fields:
+          - label: "Seo title"
+            name: seo_title
+            widget: string
+            required: false
+            hint: "The title shown on the browser tab and in Google results."
+          - label: "Seo description"
+            name: seo_description
+            widget: text
+            required: false
+            hint: "The short description shown under the title in Google results (about 150 characters)."
+          - label: "Hero"
+            name: hero
+            widget: object
+            collapsed: true
+            fields:
+              - label: "Eyebrow"
+                name: eyebrow
+                widget: string
+                required: false
+              - label: "Heading"
+                name: heading
+                widget: text
+                required: false
+                hint: "Press Enter to start a new line. The line break only shows on large screens."
+              - label: "Text"
+                name: text
+                widget: text
+                required: false
+          - label: "Updated"
+            name: updated
+            widget: string
+            required: false
+          - label: "Body"
+            name: body
+            widget: markdown
+            required: false
+            hint: "Use {{email}} to insert the email address from Contact details. Text in [square brackets] is highlighted in gold as a reminder to fill in a detail."
+          - label: "Cta"
+            name: cta
+            widget: object
+            collapsed: true
+            fields:
+              - label: "Eyebrow"
+                name: eyebrow
+                widget: string
+                required: false
+              - label: "Title"
+                name: title
+                widget: text
+                required: false
+                hint: "Press Enter to start a new line."
+              - label: "Text"
+                name: text
+                widget: text
+                required: false
+              - label: "Button label"
+                name: button_label
+                widget: string
+                required: false
+              - label: "Button link"
+                name: button_link
+                widget: string
+                required: false
+                hint: "Where the button goes: another page (e.g. contact.html) or a full web address."
+      - name: legal
+        label: "Legal notice"
+        file: content/legal.json
+        format: json
+        fields:
+          - label: "Seo title"
+            name: seo_title
+            widget: string
+            required: false
+            hint: "The title shown on the browser tab and in Google results."
+          - label: "Seo description"
+            name: seo_description
+            widget: text
+            required: false
+            hint: "The short description shown under the title in Google results (about 150 characters)."
+          - label: "Hero"
+            name: hero
+            widget: object
+            collapsed: true
+            fields:
+              - label: "Eyebrow"
+                name: eyebrow
+                widget: string
+                required: false
+              - label: "Heading"
+                name: heading
+                widget: text
+                required: false
+                hint: "Press Enter to start a new line. The line break only shows on large screens."
+              - label: "Text"
+                name: text
+                widget: text
+                required: false
+          - label: "Updated"
+            name: updated
+            widget: string
+            required: false
+          - label: "Body"
+            name: body
+            widget: markdown
+            required: false
+            hint: "Use {{email}} to insert the email address from Contact details. Text in [square brackets] is highlighted in gold as a reminder to fill in a detail."
+          - label: "Cta"
+            name: cta
+            widget: object
+            collapsed: true
+            fields:
+              - label: "Eyebrow"
+                name: eyebrow
+                widget: string
+                required: false
+              - label: "Title"
+                name: title
+                widget: text
+                required: false
+                hint: "Press Enter to start a new line."
+              - label: "Text"
+                name: text
+                widget: text
+                required: false
+              - label: "Button label"
+                name: button_label
+                widget: string
+                required: false
+              - label: "Button link"
+                name: button_link
+                widget: string
+                required: false
+                hint: "Where the button goes: another page (e.g. contact.html) or a full web address."
+
+  - name: team
+    label: "Attorneys"
+    files:
+      - name: team
+        label: "Attorney profiles (Home and About pages)"
+        file: content/team.json
+        format: json
+        fields:
+          - label: "Members"
+            name: members
+            widget: list
+            collapsed: true
+            required: false
+            summary: "{{fields.name}}"
+            fields:
+              - label: "Name"
+                name: name
+                widget: string
+                required: false
+              - label: "Role"
+                name: role
+                widget: string
+                required: false
+              - label: "Image"
+                name: image
+                widget: image
+                required: false
+                hint: "Upload a photo. Landscape photos at least 1200 px wide look best."
+              - label: "Short bio"
+                name: short_bio
+                widget: text
+                required: false
+              - label: "Long bio"
+                name: long_bio
+                widget: text
+                required: false
+              - label: "Focus"
+                name: focus
+                widget: string
+                required: false
+              - label: "Link"
+                name: link
+                widget: string
+                required: false
+                hint: "Where the link goes: another page (e.g. contact.html) or a full web address (https://...)."

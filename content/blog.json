@@ -1,0 +1,34 @@
+{
+  "seo_title": "Blog | Gamaliel Consult",
+  "seo_description": "Practical perspectives on law, business and life from Gamaliel Consult. Read our latest insights.",
+  "hero": {
+    "eyebrow": "The journal",
+    "heading": "Insight for the\ndecisions ahead.",
+    "text": "Practical perspectives on law, business and life. Explore the issues that matter — and the questions worth asking."
+  },
+  "featured_label": "Featured insight",
+  "featured_link_label": "Read the insight",
+  "list_title": "Latest perspectives",
+  "filters": [
+    "Business",
+    "Disputes",
+    "Property",
+    "Private client"
+  ],
+  "footnote": "Our insights provide general information only. The law and its application depend on the facts and jurisdiction. Please seek advice about your own circumstances.",
+  "no_results": "No insights match your search. Try a different topic or keyword.",
+  "newsletter": {
+    "eyebrow": "Stay informed",
+    "title": "A considered read.\nDelivered occasionally.",
+    "text": "Receive new perspectives from the Gamaliel Consult journal.",
+    "button_label": "Subscribe",
+    "note": "By subscribing, you agree to our privacy policy. Unsubscribe at any time."
+  },
+  "post": {
+    "article_note": "This article provides general information only. The law and its application depend on the facts and jurisdiction. Please seek advice about your own circumstances.",
+    "more_eyebrow": "Keep reading",
+    "more_title": "More from the journal.",
+    "more_link_label": "Visit the blog",
+    "back_label": "← Back to the journal"
+  }
+}

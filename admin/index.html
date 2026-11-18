@@ -3,11 +3,48 @@
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
-  <meta name="robots" content="noindex">
-  <title>Content Manager | Gamaliel Consult</title>
+  <meta name="robots" content="noindex, nofollow">
+  <title>Site admin | Gamaliel Consult</title>
+  <link rel="icon" href="/images/logo.png">
+  <link rel="stylesheet" href="admin.css">
 </head>
 <body>
-  <!-- Decap CMS: the editing screen. Sign-in is handled by Decap Turbo (see README). -->
-  <script src="https://cdn.jsdelivr.net/npm/decap-cms@^3.17.0/dist/decap-cms.js"></script>
+  <noscript><p style="padding:24px">Please turn on JavaScript to use the site admin.</p></noscript>
+
+  <!-- Sign-in screen -->
+  <main id="login" class="login hidden">
+    <form id="login-form" class="login-card" autocomplete="on">
+      <img src="/images/logo.png" alt="Gamaliel Consult" width="96">
+      <h1>Site admin</h1>
+      <p class="muted">Sign in to edit the website.</p>
+      <label for="login-email">Email</label>
+      <input id="login-email" name="email" type="email" autocomplete="username" required>
+      <label for="login-password">Password</label>
+      <input id="login-password" name="password" type="password" autocomplete="current-password" required>
+      <p id="login-error" class="error" role="alert"></p>
+      <button class="btn-primary" type="submit">Sign in</button>
+    </form>
+  </main>
+
+  <!-- Admin app -->
+  <div id="app" class="app hidden">
+    <header class="topbar">
+      <strong>Gamaliel Consult <span class="muted-light">· Site admin</span></strong>
+      <span class="topbar-right">
+        <a href="/" target="_blank" rel="noopener">View website</a>
+        <button id="logout" type="button" class="btn-ghost">Sign out</button>
+      </span>
+    </header>
+    <div class="layout">
+      <nav id="nav" class="nav" aria-label="Admin sections"></nav>
+      <section class="main">
+        <div id="toast" class="toast hidden" role="status" aria-live="polite"></div>
+        <div id="view"></div>
+      </section>
+    </div>
+  </div>
+
+  <script src="shared.js"></script>
+  <script src="admin.js"></script>
 </body>
 </html>

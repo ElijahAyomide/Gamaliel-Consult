@@ -5,8 +5,15 @@
 [build.environment]
   NODE_VERSION = "20"
 
-# Keep the admin screen out of Google
+# The admin API (login + saving to GitHub)
+[functions]
+  directory = "netlify/functions"
+
+# Keep the admin screen private and out of Google
 [[headers]]
   for = "/admin/*"
   [headers.values]
-    X-Robots-Tag = "noindex"
+    X-Robots-Tag = "noindex, nofollow"
+    Cache-Control = "no-store"
+    X-Frame-Options = "DENY"
+    Referrer-Policy = "no-referrer"

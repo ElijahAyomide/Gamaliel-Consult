@@ -1,74 +1,83 @@
-# Gamaliel Consult website (editable version)
+# Gamaliel Consult website (with its own admin login)
 
-The website text, images and blog posts now live in the `content/` folder and are edited through the
-admin screen at **your-site-address/admin**. A small script (`build.js`) turns that content into the
-finished pages every time you publish. Netlify runs it for you, so there is nothing to install.
+All the website text, photos and blog posts live in the `content/` folder. The admin screen at
+**your-site-address/admin** lets one person sign in with an email and password and edit them.
+When the admin clicks Save, the change is saved to GitHub and Netlify rebuilds the website
+(about a minute). No other service or account is needed.
 
-## One-time setup (do these in order)
+## One-time setup (in order)
 
-### 1. Replace the old files in your project
-In your project folder, delete the old page files (`index.html`, `about.html`, `practice-areas.html`,
-`blog.html`, `contact.html`, `privacy.html`, `legal.html` and every `post-*.html`), then copy everything
-from this zip into the folder (keep `css`, `js`, `images`, `content`, `admin`, `build.js`, `netlify.toml`,
-`package.json`). Then in the VS Code terminal:
+### 1. Replace the old files and push
+In your project folder delete the old page files (`index.html`, `about.html`, `practice-areas.html`,
+`blog.html`, `contact.html`, `privacy.html`, `legal.html`, every `post-*.html`) and the old `css`, `js`,
+`images` and `admin` folders. Copy everything from this zip into the folder, then run:
 
     git add -A
-    git commit -m "Editable site with admin"
+    git commit -m "Editable site with admin login"
     git push
 
-### 2. Change two Netlify settings
-Netlify > your site > **Project configuration > Build & deploy > Build settings** (the file `netlify.toml`
-already contains these, but check them):
-- Build command: `node build.js`
-- Publish directory: `dist`
+### 2. Netlify build settings
+Nothing to type: `netlify.toml` already tells Netlify to run `node build.js` and publish `dist`,
+and to run the admin function. After the deploy, check that it says "Published".
 
-Then open **Deploys** and watch the new deploy finish. If it fails, send the log text.
+### 3. Contact-form messages to your email
+1. Netlify > **Forms**: you should see `contact` and `newsletter`.
+2. **Project configuration > Notifications > Emails and webhooks > Add notification > Email notification**.
+3. Event: **New form submission**. Form: **contact**. Enter the address that should receive enquiries. Save.
+4. Repeat for `newsletter`. Then send a test message from the live Contact page.
 
-### 3. Make contact-form messages arrive in your email
-1. After the deploy above, open Netlify > **Forms**. You should see two forms: `contact` and `newsletter`.
-2. Go to **Project configuration > Notifications > Emails and webhooks > Add notification > Email notification**.
-3. Event to listen for: **New form submission**. Choose the form `contact`. Enter the email address that
-   should receive enquiries. Save.
-4. Repeat for `newsletter` (use the same or another address).
-5. Test it: send a message from the live Contact page. It should appear under Forms and in your inbox.
+### 4. Turn on the admin login
 
-The email address you type in step 3 is where messages are delivered. It is separate from the email address
-shown on the website, which you change in the admin.
+**a. Create a GitHub key for the admin (a "fine-grained token")**
+1. GitHub > your profile picture > **Settings > Developer settings > Personal access tokens > Fine-grained tokens > Generate new token**.
+2. Name: `Website admin`. Expiration: choose a date (for example one year) and put a reminder in your calendar.
+3. **Repository access: Only select repositories** > pick your website repository.
+4. **Permissions > Repository permissions > Contents: Read and write**.
+5. Generate the token and copy it now (GitHub shows it only once).
 
-### 4. Turn on the admin login (Decap Turbo)
-The admin signs in with an email and password (no GitHub account needed for the editor).
-1. Go to https://turbo.decapcms.org/signup and create an account (the Free plan needs no card).
-2. Connect GitHub when asked (install the **Decap Turbo GitHub App** on your website repository).
-3. Create a site in Turbo: pick the repository, branch `main`, and set the admin URL to
-   `https://YOUR-SITE.netlify.app/admin/` (use your real address). Copy the **Site ID**.
-4. Open `admin/config.yml` and replace `YOUR_TURBO_SITE_ID` with that Site ID. Save, then commit and push
-   (`git add -A`, `git commit -m "Add Turbo site ID"`, `git push`).
-5. In the Turbo dashboard, invite the person who will manage the website by email. They choose a password
-   and then sign in at `https://YOUR-SITE.netlify.app/admin/`.
+**b. Add the settings in Netlify**
+Netlify > your site > **Site configuration > Environment variables > Add a variable**. Add these six:
 
-Check Turbo's pricing page for the current limits. At launch the Free plan covered 1 site and 1 seat, and a
-paid plan covered more people.
+| Name | Value |
+|---|---|
+| `ADMIN_EMAIL` | the email the admin will sign in with |
+| `ADMIN_PASSWORD` | a long password or passphrase (14+ characters) |
+| `SESSION_SECRET` | any random text, 40+ characters (keep it secret) |
+| `GITHUB_TOKEN` | the token you copied |
+| `GITHUB_REPO` | `your-github-username/your-repository-name` |
+| `GITHUB_BRANCH` | `main` |
 
-## What the admin can edit
-- **Blog posts:** add, edit, delete or hide (Draft) posts, with cover image, category, date and article text.
-  Tick "Featured post" to show a post in the large panel at the top of the Blog page.
-- **Contact details & site settings:** email, phone, WhatsApp number, LinkedIn link, address, footer text,
-  and the "Let's talk" band that appears on several pages. The LinkedIn link stays hidden until you fill it in.
-- **Pages:** all text and images on Home, About Us, Practice Areas, Contact Us, Blog, Privacy and Legal.
-- **Attorneys:** names, roles, photos and descriptions (used on the Home and About pages).
+**c. Redeploy once** so the admin picks up the settings: Netlify > **Deploys > Trigger deploy > Deploy site**.
+
+**d. Sign in** at `https://YOUR-SITE.netlify.app/admin/` with the email and password from step b.
 
 Notes:
-- After clicking **Publish**, the live site updates in about a minute.
-- Text fields that say "Press Enter" can hold a line break, which shows as a new line on large screens.
+- To change the admin password, change `ADMIN_PASSWORD` in Netlify and redeploy.
+- To sign everyone out at once, change `SESSION_SECRET` and redeploy. Sessions also expire after 12 hours.
+- Keep `GITHUB_TOKEN` private. It only exists in Netlify, never in the website or the code.
+- Too many wrong passwords from one place are blocked for 15 minutes.
+
+## What the admin can do
+- **Blog posts:** write, edit, hide (draft) or delete posts, with a cover photo, category and a preview.
+  The newest post marked "Featured" appears in the large panel on the Blog page.
+- **Contact details & footer:** email, phone, WhatsApp number, LinkedIn link, address, footer text and the
+  "Let's talk" band. The LinkedIn link stays hidden until an address is filled in. The tap-to-call link
+  follows the phone number automatically.
+- **Pages:** the text and photos of Home, About Us, Practice Areas, Contact Us, Blog, Privacy and Legal.
+- **Attorneys:** names, roles, photos and descriptions.
+
+Good to know:
+- After **Save**, the live site updates in about a minute. If two people save at once, the second gets a
+  message asking them to reload.
+- Photos are shrunk in the browser before upload (JPG, PNG or WebP). Landscape photos work best.
 - In long texts you can type `{{email}}` to insert the email address from the contact settings.
-- Text in [square brackets] on the Privacy and Legal pages is highlighted gold as a reminder to fill something in.
-- Uploaded photos are saved in `images/uploads`. Landscape photos at least 1200 px wide look best.
+- Text in [square brackets] on the Privacy and Legal pages shows in gold as a reminder to fill in a detail.
+- The admin can only change the website's content. It cannot change the design or other files.
 
 ## Folder guide
-- `content/` the text and posts (edited by the admin)
-- `admin/` the admin screen and its settings (`config.yml`)
-- `css/`, `js/`, `images/` the design, behaviour and pictures
-- `build.js` builds the website into `dist/` (created automatically, not saved to GitHub)
-- `netlify.toml` tells Netlify how to build
-
-Optional: to preview on your own computer, install Node.js, run `node build.js` and open `dist/index.html`.
+- `content/` the text and posts (edited through the admin)
+- `admin/` the admin screen
+- `netlify/functions/admin.js` the private function that checks the password and saves to GitHub
+- `build.js` and `lib/` build the pages (the result goes to `dist/`, created automatically)
+- `css/`, `js/`, `images/` design, behaviour and pictures (admin uploads go to `images/uploads`)
+- `netlify.toml` Netlify settings

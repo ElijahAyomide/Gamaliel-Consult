@@ -1,7 +1,8 @@
 {
   "email": "hello@gamalielconsult.com",
   "phone": "08145686089",
-  "phone_for_tap_to_call": "+2348145686089",
+  "phone_country_code": "+234",
+  "phone_for_tap_to_call": "",
   "whatsapp_number": "2348145686089",
   "linkedin_url": "",
   "address": "",

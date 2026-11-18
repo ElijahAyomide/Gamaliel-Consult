@@ -12,15 +12,9 @@ const OUT = path.join(ROOT, 'dist');
 const CONTENT = path.join(ROOT, 'content');
 
 /* ---------------------------------------------------------------- helpers */
-const esc = (s) => String(s ?? '').replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;');
+const { esc, slugify, fmtDate, safeUrl, inl, md, parseFront } = require('./lib/shared.js');
 const br = (s, cls) => esc(s).trim().replace(/\r?\n/g, cls ? `<br class="${cls}"> ` : '<br>');
 const pad = (n) => String(n).padStart(2, '0');
-const slugify = (s) => String(s).toLowerCase().replace(/&/g, 'and').replace(/[^a-z0-9]+/g, '-').replace(/^-|-$/g, '');
-const MONTHS = ['January', 'February', 'March', 'April', 'May', 'June', 'July', 'August', 'September', 'October', 'November', 'December'];
-const fmtDate = (iso) => {
-  const m = /(\d{4})-(\d{2})-(\d{2})/.exec(iso || '');
-  return m ? `${parseInt(m[3], 10)} ${MONTHS[parseInt(m[2], 10) - 1]} ${m[1]}` : '';
-};
 const readJSON = (name) => {
   const file = path.join(CONTENT, name);
   try { return JSON.parse(fs.readFileSync(file, 'utf8')); }
@@ -32,104 +26,20 @@ const deep = (v, fn) => {
   if (v && typeof v === 'object') return Object.fromEntries(Object.entries(v).map(([k, x]) => [k, deep(x, fn)]));
   return v;
 };
-const safeUrl = (u) => (/^\s*(javascript|data|vbscript):/i.test(u) ? '#' : u);
-
-/* ------------------------------------------------- tiny markdown renderer */
-function inl(src, opts = {}) {
-  let s = esc(src);
-  const stash = [];
-  s = s.replace(/\[([^\]]+)\]\(([^)\s]+)\)/g, (_, t, u) => {
-    const url = safeUrl(u.replace(/&amp;/g, '&'));
-    const ext = /^https?:/i.test(url) ? ' target="_blank" rel="noopener"' : '';
-    stash.push(`<a href="${esc(url)}"${ext}>${t}</a>`);
-    return `\u0000${stash.length - 1}\u0000`;
-  });
-  s = s.replace(/\*\*([^*]+)\*\*/g, '<strong>$1</strong>');
-  s = s.replace(/(^|[\s(])\*([^*\s][^*]*)\*(?=[\s).,;:!?]|$)/g, '$1<em>$2</em>');
-  if (opts.todo !== false) s = s.replace(/\[([^\]]+)\]/g, '<span class="todo">[$1]</span>');
-  return s.replace(/\u0000(\d+)\u0000/g, (_, i) => stash[+i]);
-}
-function md(src, { leadFirst = false } = {}) {
-  const lines = String(src || '').replace(/\r\n?/g, '\n').split('\n');
-  const out = [];
-  let i = 0, first = true;
-  const special = (l) => /^(#{1,6}\s|>|[-*]\s|\d+\.\s|!\[|(-{3,}|\*{3,})$)/.test(l);
-  while (i < lines.length) {
-    const l = lines[i];
-    if (!l.trim()) { i++; continue; }
-    let m;
-    if ((m = l.match(/^(#{1,6})\s+(.*)$/))) {
-      const lvl = m[1].length <= 2 ? 2 : m[1].length;
-      out.push(`<h${lvl}>${inl(m[2].trim())}</h${lvl}>`); i++; continue;
-    }
-    if (/^(-{3,}|\*{3,})\s*$/.test(l)) { out.push('<hr>'); i++; continue; }
-    if ((m = l.match(/^!\[([^\]]*)\]\(([^)]+)\)\s*$/))) {
-      out.push(`<img src="${esc(safeUrl(m[2]))}" alt="${esc(m[1])}">`); i++; continue;
-    }
-    if (/^>\s?/.test(l)) {
-      const buf = [];
-      while (i < lines.length && /^>\s?/.test(lines[i])) buf.push(lines[i++].replace(/^>\s?/, ''));
-      out.push(`<blockquote>${inl(buf.join(' ').trim())}</blockquote>`); continue;
-    }
-    if (/^[-*]\s+/.test(l)) {
-      const items = [];
-      while (i < lines.length && /^[-*]\s+/.test(lines[i])) items.push(lines[i++].replace(/^[-*]\s+/, ''));
-      out.push(`<ul>${items.map((x) => `\n  <li>${inl(x)}</li>`).join('')}\n</ul>`); continue;
-    }
-    if (/^\d+\.\s+/.test(l)) {
-      const items = [];
-      while (i < lines.length && /^\d+\.\s+/.test(lines[i])) items.push(lines[i++].replace(/^\d+\.\s+/, ''));
-      out.push(`<ol>${items.map((x) => `\n  <li>${inl(x)}</li>`).join('')}\n</ol>`); continue;
-    }
-    const buf = [];
-    while (i < lines.length && lines[i].trim() && !special(lines[i])) buf.push(lines[i++].trim());
-    if (!buf.length) { buf.push(lines[i++]); }
-    out.push(`<p${leadFirst && first ? ' class="lead-p"' : ''}>${inl(buf.join(' '))}</p>`);
-    first = false;
-  }
-  return out.join('\n          ');
-}
-
-/* ------------------------------------------- front matter (blog posts) */
-function scalar(v) {
-  v = v.trim();
-  if (v === 'true') return true;
-  if (v === 'false') return false;
-  if (v === '' || v === 'null' || v === '~') return '';
-  if (v[0] === '"' && v.endsWith('"') && v.length > 1) { try { return JSON.parse(v); } catch (e) { return v.slice(1, -1); } }
-  if (v[0] === "'" && v.endsWith("'") && v.length > 1) return v.slice(1, -1).replace(/''/g, "'");
-  return v;
-}
-function parseFront(text, file) {
-  const m = text.replace(/\r\n?/g, '\n').match(/^---\n([\s\S]*?)\n---\n?([\s\S]*)$/);
-  if (!m) throw new Error(`${file}: missing the --- front matter block`);
-  const data = {};
-  const ls = m[1].split('\n');
-  for (let i = 0; i < ls.length; i++) {
-    const mm = ls[i].match(/^([A-Za-z_][\w-]*):\s*(.*)$/);
-    if (!mm) continue;
-    const key = mm[1];
-    let v = mm[2].trim();
-    if (/^[>|][+-]?$/.test(v)) {
-      const folded = v[0] === '>';
-      const buf = [];
-      while (i + 1 < ls.length && (/^\s/.test(ls[i + 1]) || ls[i + 1] === '')) buf.push(ls[++i].trim());
-      data[key] = buf.join(folded ? ' ' : '\n').trim();
-      continue;
-    }
-    const cont = [];
-    while (i + 1 < ls.length && /^\s+\S/.test(ls[i + 1])) cont.push(ls[++i].trim());
-    if (cont.length) v = [v, ...cont].join(' ');
-    data[key] = scalar(v);
-  }
-  return { data, body: m[2] };
-}
 
 /* ------------------------------------------------------------- load data */
 const settings0 = readJSON('settings.json');
 const digits = (s) => String(s || '').replace(/\D/g, '');
 const S0 = settings0;
-const tel = (S0.phone_for_tap_to_call || S0.phone || '').replace(/[^\d+]/g, '');
+const tel = (() => {
+  const clean = (x) => String(x || '').replace(/[^\d+]/g, '');
+  if (S0.phone_for_tap_to_call) return clean(S0.phone_for_tap_to_call);
+  const d = clean(S0.phone);
+  const cc = clean(S0.phone_country_code);
+  if (d.startsWith('+')) return d;
+  if (cc && d.startsWith('0')) return (cc.startsWith('+') ? cc : '+' + cc) + d.slice(1);
+  return d;
+})();
 const TOKENS = {
   email: S0.email || '',
   phone: S0.phone || '',
@@ -851,6 +761,7 @@ fs.mkdirSync(OUT, { recursive: true });
 for (const dir of ['css', 'js', 'images', 'admin']) {
   if (fs.existsSync(path.join(ROOT, dir))) fs.cpSync(path.join(ROOT, dir), path.join(OUT, dir), { recursive: true });
 }
+fs.copyFileSync(path.join(ROOT, 'lib', 'shared.js'), path.join(OUT, 'admin', 'shared.js'));
 let count = 0;
 for (const [file, render] of Object.entries(pages)) {
   fs.writeFileSync(path.join(OUT, file), render());

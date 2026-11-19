@@ -16,7 +16,8 @@
 @media (min-width: 768px) { :root { --pad: 11.2px; } }
 
 *, *::before, *::after { box-sizing: border-box; }
-html { scroll-behavior: smooth; }
+html { scroll-behavior: smooth; scroll-padding-top: 84px; }
+@media (min-width: 768px) { html { scroll-padding-top: 100px; } }
 body { margin: 0; font-family: var(--sans); color: var(--navy); background: #fff; -webkit-font-smoothing: antialiased; line-height: 1.5; }
 img { display: block; max-width: 100%; }
 a { color: inherit; text-decoration: none; }
@@ -49,7 +50,8 @@ h1, h2, h3 { font-family: var(--serif); font-weight: 400; }
 @media (min-width: 768px) { .btn-block { width: auto; } }
 
 /* Header */
-.site-header { position: relative; z-index: 40; background: #fff; }
+.site-header { position: sticky; top: 0; z-index: 40; background: #fff; transition: box-shadow .2s ease; }
+.site-header.is-scrolled { box-shadow: 0 2px 14px rgba(28,34,43,.10); }
 .header-inner { display: flex; align-items: center; justify-content: space-between; height: 72px; }
 @media (min-width: 768px) { .header-inner { height: 88px; } }
 .logo img { height: 60px; width: auto; }
@@ -64,7 +66,7 @@ h1, h2, h3 { font-family: var(--serif); font-weight: 400; }
 .menu-toggle[aria-expanded="true"] .icon-open { display: none; }
 .menu-toggle[aria-expanded="true"] .icon-close { display: block; }
 /* Mobile menu: a card anchored to the top-right corner, under the menu button */
-.mobile-menu { display: none; position: absolute; right: 0; left: auto; top: 100%; width: 260px; max-width: 100%; background: #fff; border: 1px solid var(--line); border-right: 0; box-shadow: 0 12px 28px rgba(28,34,43,.14); }
+.mobile-menu { display: none; max-height: calc(100vh - 72px); overflow-y: auto; position: absolute; right: 0; left: auto; top: 100%; width: 260px; max-width: 100%; background: #fff; border: 1px solid var(--line); border-right: 0; box-shadow: 0 12px 28px rgba(28,34,43,.14); }
 .mobile-menu.open { display: block; }
 .mobile-menu ul { max-width: none; margin: 0; padding: 12px 20px 20px; }
 .mobile-menu li { text-align: center; }

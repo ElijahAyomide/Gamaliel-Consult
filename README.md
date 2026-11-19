@@ -2,8 +2,9 @@
 
 All the website text, photos and blog posts live in the `content/` folder. The admin screen at
 **your-site-address/admin** lets one person sign in with an email and password and edit them.
-When the admin clicks Save, the change is saved to GitHub and Netlify rebuilds the website
-(about a minute). No other service or account is needed.
+The admin saves each change as they go, then clicks **Update website** once. All the saved changes are
+published together as a single update, so Netlify rebuilds the website only once (about a minute) no matter
+how many things were edited. No other service or account is needed.
 
 ## One-time setup (in order)
 
@@ -57,6 +58,21 @@ Notes:
 - Keep `GITHUB_TOKEN` private. It only exists in Netlify, never in the website or the code.
 - Too many wrong passwords from one place are blocked for 15 minutes.
 
+## How the admin saves and publishes
+1. Make a change and click **Save changes** (or **Save post**). Nothing goes live yet. The change is kept
+   safely on that computer, and a bar at the top shows how many changes are waiting.
+2. Keep going: edit as many pages and posts as needed, upload photos, add or delete posts.
+3. Click **Review changes** to see the list (any item can be discarded), then **Update website**.
+   Everything is sent to GitHub as one update, and Netlify builds the site once.
+
+Good to know:
+- Saved changes stay on the computer and browser used to make them, even after a refresh or sign-out, until
+  they are published or discarded. They do not follow the admin to another computer.
+- Photos are only uploaded when the admin clicks Update website, and only if a saved page or post uses them.
+- If the website's files were also changed somewhere else (for example in VS Code) after the admin started
+  editing, publishing stops with a message naming the page. Nothing is lost: the admin discards their change
+  to that page and edits it again.
+
 ## What the admin can do
 - **Blog posts:** write, edit, hide (draft) or delete posts, with a cover photo, category and a preview.
   The newest post marked "Featured" appears in the large panel on the Blog page.
@@ -66,9 +82,7 @@ Notes:
 - **Pages:** the text and photos of Home, About Us, Practice Areas, Contact Us, Blog, Privacy and Legal.
 - **Attorneys:** names, roles, photos and descriptions.
 
-Good to know:
-- After **Save**, the live site updates in about a minute. If two people save at once, the second gets a
-  message asking them to reload.
+Also good to know:
 - Photos are shrunk in the browser before upload (JPG, PNG or WebP). Landscape photos work best.
 - In long texts you can type `{{email}}` to insert the email address from the contact settings.
 - Text in [square brackets] on the Privacy and Legal pages shows in gold as a reminder to fill in a detail.

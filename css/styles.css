@@ -110,7 +110,6 @@ h1, h2, h3 { font-family: var(--serif); font-weight: 400; }
 @media (min-width: 768px) { .practice-card { padding-bottom: 0; } }
 .practice-card .top { display: flex; justify-content: space-between; align-items: flex-start; }
 .practice-card svg { width: 28px; height: 28px; color: var(--gold); fill: none; stroke: currentColor; stroke-width: 1.2; }
-.practice-card .num { font-size: 11px; color: var(--muted); }
 .practice-card h3 { font-size: 22px; line-height: 1.3; margin-top: 24px; }
 .practice-card p { margin-top: 12px; }
 .practice-card .link { margin-top: 20px; }
@@ -158,8 +157,7 @@ h1, h2, h3 { font-family: var(--serif); font-weight: 400; }
 @media (min-width: 768px) { .steps { margin-top: 48px; grid-template-columns: repeat(3, 1fr); gap: 40px; } }
 .step { border-top: 1px solid var(--line); padding: 24px 0; }
 @media (min-width: 768px) { .step { padding-bottom: 0; } }
-.step .n { font-size: 11px; color: var(--gold); }
-.step h3 { font-size: 22px; line-height: 1.3; margin-top: 16px; }
+.step h3 { font-size: 22px; line-height: 1.3; margin-top: 0; }
 .step p { margin-top: 12px; }
 
 /* Journal */
@@ -257,7 +255,6 @@ h1, h2, h3 { font-family: var(--serif); font-weight: 400; }
 @media (min-width: 768px) { .area-card { padding: 32px; } }
 .area-card .top { display: flex; justify-content: space-between; align-items: flex-start; }
 .area-card svg { width: 28px; height: 28px; color: var(--gold); fill: none; stroke: currentColor; stroke-width: 1.2; }
-.area-card .num { font-size: 11px; color: var(--muted); }
 .area-card h3 { font-size: 26px; line-height: 1.25; margin-top: 24px; }
 .area-card > .small-text { margin-top: 14px; }
 .bullets { margin-top: 20px; display: grid; gap: 10px; flex: 1; }

@@ -88,3 +88,9 @@ table.posts th { font-size: 12px; text-transform: uppercase; letter-spacing: .08
 .md-tools { display: flex; gap: 6px; flex-wrap: wrap; margin-bottom: 6px; }
 iframe.preview { width: 100%; min-height: 420px; border: 1px solid #CFCAC0; background: #fff; border-radius: 4px; }
 .top-actions { display: flex; justify-content: space-between; align-items: center; margin-bottom: 16px; gap: 12px; flex-wrap: wrap; }
+
+/* saved-but-unpublished bar */
+.pendingbar { position: sticky; top: 53px; z-index: 15; display: flex; align-items: center; justify-content: space-between; gap: 12px; flex-wrap: wrap; background: #FFF6DF; border: 1px solid #E5CF9F; border-radius: 6px; padding: 10px 14px; margin-bottom: 16px; font-size: 14px; }
+.pb-actions { display: flex; gap: 8px; }
+.notice { background: #FFF6DF; border: 1px solid #E5CF9F; border-radius: 6px; padding: 10px 14px; margin-bottom: 16px; font-size: 14px; display: flex; gap: 10px; align-items: center; flex-wrap: wrap; }
+@media (max-width: 800px) { .pendingbar { top: 0; position: static; } }

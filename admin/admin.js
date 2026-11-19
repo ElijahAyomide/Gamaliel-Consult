@@ -7,7 +7,10 @@
   let token = sessionStorage.getItem(TOKEN_KEY) || '';
   let dirty = false;
   let uid = 0;
-  const blobs = new Map(); // freshly uploaded photo path -> local preview URL
+  const blobs = new Map(); // staged photo path -> local preview URL
+  let userEmail = '';
+  // Everything the admin has saved but not yet published. Kept on this computer until "Update website".
+  let pending = { files: {}, images: {} };
 
   const $ = (s, r = document) => r.querySelector(s);
   const nid = () => 'f' + (++uid);
@@ -29,6 +32,60 @@
     return el;
   }
 
+  /* ------------------------------------------------ saved-but-unpublished store */
+  const openDb = () => new Promise((res, rej) => {
+    const r = indexedDB.open('gc-admin', 1);
+    r.onupgradeneeded = () => r.result.createObjectStore('kv');
+    r.onsuccess = () => res(r.result);
+    r.onerror = () => rej(r.error);
+  });
+  async function kv(mode, fn) {
+    const db = await openDb();
+    return new Promise((res, rej) => {
+      const tx = db.transaction('kv', mode);
+      const req = fn(tx.objectStore('kv'));
+      tx.oncomplete = () => res(req && req.result);
+      tx.onerror = () => rej(tx.error);
+    });
+  }
+  const pendKey = () => 'pending:' + userEmail;
+  async function loadPending() {
+    try { pending = (await kv('readonly', (st) => st.get(pendKey()))) || { files: {}, images: {} }; } catch (e) { pending = { files: {}, images: {} }; }
+    pending.files = pending.files || {};
+    pending.images = pending.images || {};
+  }
+  async function savePending() {
+    try { await kv('readwrite', (st) => st.put(pending, pendKey())); }
+    catch (e) { toast('Your changes could not be kept on this computer. Please publish them soon.', 'error'); }
+    refreshBar();
+  }
+  const pendingCount = () => Object.keys(pending.files).length;
+
+  async function stageFile(path, content, baseSha, label) {
+    const prev = pending.files[path];
+    pending.files[path] = { content, baseSha: prev ? prev.baseSha : baseSha, label };
+    await savePending();
+  }
+  async function stageDelete(path, baseSha, label) {
+    const prev = pending.files[path];
+    const base = prev ? prev.baseSha : baseSha;
+    if (base == null) delete pending.files[path]; // it was never published, so just forget it
+    else pending.files[path] = { deleted: true, baseSha: base, label };
+    await savePending();
+  }
+  async function discardFile(path) { delete pending.files[path]; await savePending(); }
+  function previewFor(path) {
+    if (blobs.has(path)) return blobs.get(path);
+    const im = pending.images[path];
+    if (!im) return '';
+    const bin = atob(im.data);
+    const bytes = new Uint8Array(bin.length);
+    for (let i = 0; i < bin.length; i++) bytes[i] = bin.charCodeAt(i);
+    const url = URL.createObjectURL(new Blob([bytes], { type: 'image/jpeg' }));
+    blobs.set(path, url);
+    return url;
+  }
+
   /* --------------------------------------------------------------------- API */
   async function api(action, payload = {}) {
     const res = await fetch(API, {
@@ -41,7 +98,11 @@
       signOut('Your session has ended. Please sign in again.');
       throw new Error('Please sign in again.');
     }
-    if (!res.ok) throw new Error(data.error || 'Something went wrong. Please try again.');
+    if (!res.ok) {
+      const err = new Error(data.error || 'Something went wrong. Please try again.');
+      err.conflicts = data.conflicts;
+      throw err;
+    }
     return data;
   }
 
@@ -77,16 +138,22 @@
     try {
       const r = await api('login', { email: $('#login-email').value, password: $('#login-password').value });
       token = r.token;
+      userEmail = r.email;
       sessionStorage.setItem(TOKEN_KEY, token);
       $('#login-password').value = '';
-      startApp();
+      await startApp();
     } catch (err) {
       $('#login-error').textContent = err.message;
     } finally {
       btn.disabled = false;
     }
   });
-  $('#logout').addEventListener('click', () => { if (confirmLeave()) signOut(); });
+  $('#logout').addEventListener('click', () => {
+    if (!confirmLeave()) return;
+    const n = pendingCount();
+    if (n && !window.confirm(`You have ${n} saved ${n === 1 ? 'change' : 'changes'} that ${n === 1 ? 'is' : 'are'} not published yet. They stay saved on this computer until you publish them. Sign out anyway?`)) return;
+    signOut();
+  });
 
   /* ------------------------------------------------------------- navigation */
   const NAV = [
@@ -244,28 +311,32 @@
       img.src = url;
     });
   }
+  const slugName = (n) => String(n || 'photo').toLowerCase().replace(/\.[a-z0-9]+$/, '').replace(/[^a-z0-9]+/g, '-').replace(/^-|-$/g, '').slice(0, 40) || 'photo';
+  const stamp = () => new Date().toISOString().replace(/[-:T.Z]/g, '').slice(0, 14);
   function imageField(parent, key, o = {}) {
     const id = nid();
     const thumb = h('img', { class: 'thumb', alt: '' });
     const msg = h('span', { class: 'imgmsg' });
     const setSrc = () => {
       const v = parent[key] || '';
-      thumb.src = blobs.get(v) || (v ? '/' + v.replace(/^\//, '') : '');
+      thumb.src = previewFor(v) || (v ? '/' + v.replace(/^\//, '') : '');
       msg.textContent = v ? 'Current file: ' + v : 'No photo chosen yet.';
     };
     const input = h('input', { id, type: 'file', accept: 'image/jpeg,image/png,image/webp' });
     input.addEventListener('change', async () => {
       const f = input.files[0];
       if (!f) return;
-      msg.textContent = 'Uploading…';
+      msg.textContent = 'Preparing photo…';
       try {
         const { b64, preview } = await shrinkImage(f);
-        const r = await api('upload', { name: f.name, data: b64 });
-        parent[key] = r.path;
-        blobs.set(r.path, preview);
+        const path = `images/uploads/${stamp()}-${slugName(f.name)}.jpg`;
+        pending.images[path] = { data: b64 };
+        blobs.set(path, preview);
+        await savePending();
+        parent[key] = path;
         setSrc();
         markDirty();
-        msg.textContent = 'Photo uploaded. Click "Save changes" to use it on the website.';
+        msg.textContent = 'Photo ready. Click "Save changes" to keep it. It goes live when you click "Update website".';
       } catch (e) {
         setSrc();
         msg.textContent = e.message;
@@ -400,16 +471,27 @@
     v.append(...nodes);
   }
   const loading = (text = 'Loading…') => view(h('p', { class: 'muted' }, text));
+  const SAVED_MSG = 'Saved. When you have finished all your changes, click "Update website" at the top to put them on the live site.';
+
+  function notice(text, buttonLabel, onClick) {
+    return h('div', { class: 'notice' }, h('span', {}, text + ' '), h('button', { type: 'button', class: 'btn-line btn-small', onclick: onClick }, buttonLabel));
+  }
 
   async function openFile(it) {
     loading();
     const path = `content/${it.file}.json`;
+    const staged = pending.files[path];
     let data, sha;
-    try {
-      const r = await api('get', { path });
-      data = JSON.parse(r.content);
-      sha = r.sha;
-    } catch (e) { return view(h('p', { class: 'error' }, e.message)); }
+    if (staged && !staged.deleted) {
+      data = JSON.parse(staged.content);
+      sha = staged.baseSha;
+    } else {
+      try {
+        const r = await api('get', { path });
+        data = JSON.parse(r.content);
+        sha = r.sha;
+      } catch (e) { return view(h('p', { class: 'error' }, e.message)); }
+    }
 
     const [t, sub] = TITLES[it.id] || [it.label, ''];
     const form = h('form', { onsubmit: (e) => e.preventDefault() });
@@ -422,38 +504,53 @@
       } else form.append(renderValue(data, k));
     });
 
-    const status = h('span', { class: 'status' }, 'No changes yet');
+    const status = h('span', { class: 'status' }, staged ? 'Saved. Not published yet' : 'No changes yet');
     const saveBtn = h('button', { type: 'button', class: 'btn-primary' }, 'Save changes');
     saveBtn.addEventListener('click', async () => {
       saveBtn.disabled = true;
-      status.textContent = 'Saving…';
       try {
-        const r = await api('save', { path, sha, content: JSON.stringify(data, null, 2) + '\n' });
-        sha = r.sha;
+        await stageFile(path, JSON.stringify(data, null, 2) + '\n', sha, it.label);
         dirty = false;
         $('.savebar').classList.remove('dirty');
-        status.textContent = 'All changes saved';
-        toast('Saved. Your changes will be live on the website in about a minute.');
-      } catch (e) {
-        status.textContent = 'Not saved';
-        toast(e.message, 'error');
-      } finally { saveBtn.disabled = false; }
+        status.textContent = 'Saved. Not published yet';
+        toast(SAVED_MSG);
+      } catch (e) { toast(e.message, 'error'); }
+      finally { saveBtn.disabled = false; }
     });
-    view(h('h1', { class: 'page-title' }, t), h('p', { class: 'page-sub' }, sub), form,
-      h('div', { class: 'savebar' }, status, h('div', { class: 'actions' }, saveBtn)));
+    view(h('h1', { class: 'page-title' }, t), h('p', { class: 'page-sub' }, sub),
+      staged ? notice('This page has saved changes that are not published yet.', 'Discard my changes to this page', async () => {
+        if (!window.confirm('Discard your saved changes to this page?')) return;
+        await discardFile(path); dirty = false; openFile(it);
+      }) : null,
+      form, h('div', { class: 'savebar' }, status, h('div', { class: 'actions' }, saveBtn)));
   }
 
   /* ------------------------------------------------------------- blog posts */
   let knownSlugs = [];
+  const postPath = (slug) => `content/posts/${slug}.md`;
+
   async function showPosts() {
     loading('Loading posts…');
     let posts;
     try { posts = (await api('list-posts')).posts; } catch (e) { return view(h('p', { class: 'error' }, e.message)); }
+    posts = posts.map((p) => ({ ...p, state: '' }));
+    for (const [path, e] of Object.entries(pending.files)) {
+      const m = /^content\/posts\/(.+)\.md$/.exec(path);
+      if (!m) continue;
+      const slug = m[1];
+      const i = posts.findIndex((p) => p.slug === slug);
+      if (e.deleted) { if (i >= 0) posts.splice(i, 1); continue; }
+      let meta = {};
+      try { meta = GC.parseFront(e.content, slug).data; } catch (err) { /* keep defaults */ }
+      const row = { slug, title: meta.title || slug, date: (/\d{4}-\d{2}-\d{2}/.exec(String(meta.date)) || [''])[0], draft: meta.draft === true, featured: meta.featured === true, state: e.baseSha == null ? 'new' : 'edited' };
+      if (i >= 0) posts[i] = row; else posts.push(row);
+    }
+    posts.sort((a, b) => (b.date > a.date ? 1 : b.date < a.date ? -1 : a.slug.localeCompare(b.slug)));
     knownSlugs = posts.map((p) => p.slug);
     const rows = posts.map((p) => h('tr', {},
       h('td', {}, p.title),
       h('td', {}, GC.fmtDate(p.date) || '—'),
-      h('td', {}, p.draft ? h('span', { class: 'badge' }, 'Hidden (draft)') : h('span', { class: 'badge' }, 'Published'), p.featured ? h('span', { class: 'badge gold' }, 'Featured') : null),
+      h('td', {}, p.draft ? h('span', { class: 'badge' }, 'Hidden (draft)') : h('span', { class: 'badge' }, 'Published'), p.featured ? h('span', { class: 'badge gold' }, 'Featured') : null, p.state ? h('span', { class: 'badge gold' }, p.state === 'new' ? 'New, not published yet' : 'Edited, not published yet') : null),
       h('td', {}, h('button', { type: 'button', class: 'btn-line btn-small', onclick: () => openPost(p.slug) }, 'Edit'))));
     view(
       h('div', { class: 'top-actions' }, h('div', {}, h('h1', { class: 'page-title' }, TITLES.posts[0]), h('p', { class: 'page-sub' }, TITLES.posts[1])),
@@ -475,13 +572,15 @@
     let data = { title: '', date: today, category: CATEGORIES[0], topic: TOPICS[0], read_time: '5 min read', excerpt: '', image: '', image_alt: '', featured: false, draft: false };
     let body = '';
     let sha = null;
+    const staged = slug ? pending.files[postPath(slug)] : null;
     if (slug) {
       try {
-        const r = await api('get', { path: `content/posts/${slug}.md` });
-        const p = GC.parseFront(r.content, slug);
+        let raw;
+        if (staged && !staged.deleted) { raw = staged.content; sha = staged.baseSha; }
+        else { const r = await api('get', { path: postPath(slug) }); raw = r.content; sha = r.sha; }
+        const p = GC.parseFront(raw, slug);
         data = { ...data, ...p.data, date: (/\d{4}-\d{2}-\d{2}/.exec(String(p.data.date)) || [today])[0] };
         body = p.body.trim();
-        sha = r.sha;
       } catch (e) { return view(h('p', { class: 'error' }, e.message)); }
     }
     const holder = { body };
@@ -498,15 +597,17 @@
       checkField(data, 'draft', { label: 'Hide from the website (draft)', hint: 'Tick this to keep the post saved but not shown to visitors.' }),
       markdownField(holder, 'body', { label: 'Article text', hint: 'The first paragraph is shown slightly larger. Use "Heading" for section titles.' }));
 
-    const status = h('span', { class: 'status' }, slug ? 'No changes yet' : 'New post');
-    const saveBtn = h('button', { type: 'button', class: 'btn-primary' }, slug ? 'Save changes' : 'Publish post');
+    const status = h('span', { class: 'status' }, staged ? 'Saved. Not published yet' : slug ? 'No changes yet' : 'New post');
+    const saveBtn = h('button', { type: 'button', class: 'btn-primary' }, 'Save post');
     const back = h('button', { type: 'button', class: 'btn-line', onclick: () => { if (confirmLeave()) { dirty = false; showPosts(); } } }, '← All posts');
     const actions = h('div', { class: 'actions' }, back);
     if (slug) {
       actions.append(h('button', { type: 'button', class: 'btn-danger', onclick: async () => {
-        if (!window.confirm('Delete this post permanently? This cannot be undone.')) return;
-        try { await api('delete', { path: `content/posts/${slug}.md`, sha }); dirty = false; toast('Post deleted. It will disappear from the website in about a minute.'); showPosts(); }
-        catch (e) { toast(e.message, 'error'); }
+        if (!window.confirm('Delete this post? It will be removed from the website when you click "Update website".')) return;
+        await stageDelete(postPath(slug), sha, data.title);
+        dirty = false;
+        toast('Post removed. It will disappear from the website when you click "Update website".');
+        showPosts();
       } }, 'Delete'));
     }
     actions.append(saveBtn);
@@ -514,41 +615,123 @@
     saveBtn.addEventListener('click', async () => {
       if (!String(data.title).trim()) return toast('Please give the post a title.', 'error');
       if (!/^\d{4}-\d{2}-\d{2}$/.test(data.date)) return toast('Please choose a date.', 'error');
-      let useSlug = slug;
-      if (!useSlug) {
+      if (!slug) {
         const base = GC.slugify(data.title).slice(0, 70) || 'post';
-        useSlug = base;
-        for (let n = 2; knownSlugs.includes(useSlug); n++) useSlug = `${base}-${n}`;
+        slug = base;
+        for (let n = 2; knownSlugs.includes(slug); n++) slug = `${base}-${n}`;
+        knownSlugs.push(slug);
       }
       saveBtn.disabled = true;
-      status.textContent = 'Saving…';
       try {
-        const r = await api('save', { path: `content/posts/${useSlug}.md`, sha: sha || undefined, content: GC.serializePost(data, holder.body) });
-        sha = r.sha;
-        if (!slug) { slug = useSlug; knownSlugs.push(slug); saveBtn.textContent = 'Save changes'; }
+        await stageFile(postPath(slug), GC.serializePost(data, holder.body), sha, data.title);
         dirty = false;
         $('.savebar').classList.remove('dirty');
-        status.textContent = 'All changes saved';
-        toast('Saved. Your changes will be live on the website in about a minute.');
-      } catch (e) { status.textContent = 'Not saved'; toast(e.message, 'error'); }
+        status.textContent = 'Saved. Not published yet';
+        toast(SAVED_MSG);
+      } catch (e) { toast(e.message, 'error'); }
       finally { saveBtn.disabled = false; }
     });
 
-    view(h('h1', { class: 'page-title' }, slug ? 'Edit post' : 'New post'), h('p', { class: 'page-sub' }, 'Changes go live about a minute after you save.'), form, h('div', { class: 'savebar' }, status, actions));
+    view(h('h1', { class: 'page-title' }, slug ? 'Edit post' : 'New post'), h('p', { class: 'page-sub' }, 'Save your changes here, then click "Update website" when you have finished everything.'),
+      staged ? notice('This post has saved changes that are not published yet.', 'Discard my changes to this post', async () => {
+        if (!window.confirm('Discard your saved changes to this post?')) return;
+        await discardFile(postPath(slug)); dirty = false; showPosts();
+      }) : null,
+      form, h('div', { class: 'savebar' }, status, actions));
+  }
+
+  /* ------------------------------------- review + publish everything at once */
+  function refreshBar() {
+    const bar = $('#pendingbar');
+    if (!bar) return;
+    const n = pendingCount();
+    bar.classList.toggle('hidden', !n);
+    bar.innerHTML = '';
+    if (!n) return;
+    bar.append(
+      h('span', {}, `${n} ${n === 1 ? 'change is' : 'changes are'} saved but not published yet.`),
+      h('span', { class: 'pb-actions' },
+        h('button', { type: 'button', class: 'btn-line btn-small', onclick: showPending }, 'Review changes'),
+        h('button', { type: 'button', class: 'btn-primary btn-small publish-btn', onclick: publish }, 'Update website')));
+  }
+
+  function labelOf(path, e) {
+    const m = /^content\/([a-z-]+)\.json$/.exec(path);
+    if (m) { const it = NAV.flatMap((g) => g.items).find((i) => i.file === m[1]); return it ? it.label : path; }
+    return 'Blog post: ' + (e.label || path.replace(/^content\/posts\//, '').replace(/\.md$/, ''));
+  }
+  function showPending() {
+    if (!confirmLeave()) return;
+    dirty = false;
+    markNav('');
+    const entries = Object.entries(pending.files);
+    const photos = Object.keys(pending.images).filter((p) => entries.some(([, e]) => !e.deleted && e.content.includes(p))).length;
+    if (!entries.length) return view(h('h1', { class: 'page-title' }, 'Changes to publish'), h('p', { class: 'muted' }, 'Nothing is waiting to be published.'));
+    view(
+      h('h1', { class: 'page-title' }, 'Changes to publish'),
+      h('p', { class: 'page-sub' }, 'These changes are saved on this computer. Nothing is on the live website until you click "Update website".'),
+      h('table', { class: 'posts' }, h('thead', {}, h('tr', {}, h('th', {}, 'What changed'), h('th', {}, ''), h('th', {}, ''))),
+        h('tbody', {}, entries.map(([path, e]) => h('tr', {},
+          h('td', {}, labelOf(path, e)),
+          h('td', {}, h('span', { class: 'badge gold' }, e.deleted ? 'Deleted' : e.baseSha == null ? 'New' : 'Edited')),
+          h('td', {}, h('button', { type: 'button', class: 'btn-line btn-small', onclick: async () => { if (window.confirm('Discard this change?')) { await discardFile(path); showPending(); } } }, 'Discard')))))),
+      photos ? h('p', { class: 'muted', style: 'margin-top:12px' }, `${photos} new ${photos === 1 ? 'photo' : 'photos'} will be published with these changes.`) : null,
+      h('div', { class: 'actions', style: 'margin-top:20px;display:flex;gap:10px' },
+        h('button', { type: 'button', class: 'btn-primary publish-btn', onclick: publish }, 'Update website'),
+        h('button', { type: 'button', class: 'btn-danger', onclick: async () => { if (window.confirm('Discard ALL saved changes? This cannot be undone.')) { pending = { files: {}, images: {} }; blobs.clear(); await savePending(); showPending(); } } }, 'Discard everything')));
+  }
+
+  async function publish() {
+    const entries = Object.entries(pending.files);
+    if (!entries.length) return;
+    if (dirty && !window.confirm('The page you are editing has changes that are not saved yet, so they will NOT be included. Continue?')) return;
+    const n = entries.length;
+    if (!window.confirm(`Publish ${n} ${n === 1 ? 'change' : 'changes'} to the live website now?`)) return;
+    const buttons = document.querySelectorAll('.publish-btn');
+    buttons.forEach((b) => { b.disabled = true; b.textContent = 'Publishing…'; });
+    try {
+      const text = entries.filter(([, e]) => !e.deleted).map(([, e]) => e.content).join('\n');
+      const used = Object.keys(pending.images).filter((p) => text.includes(p));
+      for (const p of used) {
+        if (!pending.images[p].sha) {
+          pending.images[p].sha = (await api('blob', { data: pending.images[p].data })).sha;
+          await savePending();
+        }
+      }
+      const changes = [
+        ...entries.map(([path, e]) => (e.deleted ? { path, delete: true, baseSha: e.baseSha } : { path, content: e.content, baseSha: e.baseSha })),
+        ...used.map((p) => ({ path: p, blobSha: pending.images[p].sha })),
+      ];
+      await api('publish', { changes });
+      pending = { files: {}, images: {} };
+      blobs.clear();
+      dirty = false;
+      await savePending();
+      toast('Published! Your website will update in about a minute.');
+      markNav('posts');
+      showPosts();
+    } catch (e) {
+      const names = (e.conflicts || []).map((p) => labelOf(p, pending.files[p] || {})).join(', ');
+      toast(e.message + (names ? ` Affected: ${names}.` : ''), 'error');
+    } finally {
+      refreshBar();
+      document.querySelectorAll('.publish-btn').forEach((b) => { b.disabled = false; b.textContent = 'Update website'; });
+    }
   }
 
   /* ------------------------------------------------------------------ start */
   async function startApp() {
     $('#login').classList.add('hidden');
     $('#app').classList.remove('hidden');
+    await loadPending();
+    refreshBar();
     buildNav();
-    const first = NAV[0].items[0];
-    markNav(first.id);
+    markNav(NAV[0].items[0].id);
     showPosts();
   }
 
   (async () => {
     if (!token) return showLogin();
-    try { await api('me'); startApp(); } catch (e) { showLogin(); }
+    try { const me = await api('me'); userEmail = me.email; await startApp(); } catch (e) { showLogin(); }
   })();
 })();

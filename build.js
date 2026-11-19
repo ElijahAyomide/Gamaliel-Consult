@@ -14,7 +14,6 @@ const CONTENT = path.join(ROOT, 'content');
 /* ---------------------------------------------------------------- helpers */
 const { esc, slugify, fmtDate, safeUrl, inl, md, parseFront } = require('./lib/shared.js');
 const br = (s, cls) => esc(s).trim().replace(/\r?\n/g, cls ? `<br class="${cls}"> ` : '<br>');
-const pad = (n) => String(n).padStart(2, '0');
 const readJSON = (name) => {
   const file = path.join(CONTENT, name);
   try { return JSON.parse(fs.readFileSync(file, 'utf8')); }
@@ -181,7 +180,6 @@ const heroStack = (theme, h, extra = '') => `    <section class="hero-stack hero
 `;
 const steps = (arr = []) => `<ol class="steps">${arr.map((s, i) => `
           <li class="step">
-            <p class="n">${pad(i + 1)}</p>
             <h3>${esc(s.title)}</h3>
             <p class="small-text">${esc(s.text)}</p>
           </li>`).join('')}
@@ -293,7 +291,6 @@ pages['index.html'] = () => {
           <article class="practice-card">
             <div class="top">
               ${icon(c.icon)}
-              <span class="num">${pad(i + 1)}</span>
             </div>
             <h3>${esc(c.title)}</h3>
             <p class="small-text">${esc(c.text)}</p>
@@ -458,7 +455,6 @@ ${heroStack('navy', p.hero, `\n        ${link('#areas', p.hero.link_label, 'link
           <article class="area-card" id="${esc(a.id || slugify(a.title))}">
             <div class="top">
               ${icon(a.icon)}
-              <span class="num">${pad(i + 1)}</span>
             </div>
             <h3>${esc(a.title)}</h3>
             <p class="small-text">${esc(a.text)}</p>

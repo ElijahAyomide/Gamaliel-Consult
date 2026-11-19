@@ -4,7 +4,8 @@
 
   The admin screen (/admin) talks to this one function. It:
     - checks the admin's email + password and hands back a signed session token
-    - reads and writes ONLY the site's content files and uploaded photos in GitHub
+    - reads the site's content files, and publishes ALL of the admin's saved changes as ONE commit
+      (so Netlify builds the site once, not once per change)
     - never exposes the GitHub key: it stays in Netlify's environment variables
 
   Required environment variables (set in Netlify, never in the code):
@@ -125,7 +126,7 @@ async function login(cfg, body, ip) {
     throw new HttpError(401, 'That email or password is not right.');
   }
   const exp = Date.now() + SESSION_HOURS * 3600 * 1000;
-  return json(200, { token: sign({ e: cfg.email, exp }, cfg.secret), expires: exp });
+  return json(200, { token: sign({ e: cfg.email, exp }, cfg.secret), expires: exp, email: cfg.email });
 }
 
 async function listPosts(cfg) {
@@ -155,62 +156,114 @@ async function getFile(cfg, path) {
   return json(200, { content: decode(file), sha: file.sha });
 }
 
-async function saveFile(cfg, body) {
-  const { path, content, sha } = body;
-  const kind = kindOf(path);
-  if (typeof content !== 'string') throw new HttpError(400, 'Nothing to save.');
-  const size = Buffer.byteLength(content, 'utf8');
-
-  const current = await gh(cfg, 'GET', path);
-  if (kind === 'json') {
-    if (size > MAX_JSON_BYTES) throw new HttpError(400, 'That page is too large to save.');
-    let next;
-    try { next = JSON.parse(content); } catch (e) { throw new HttpError(400, 'The content is not valid.'); }
-    if (!next || typeof next !== 'object' || Array.isArray(next)) throw new HttpError(400, 'The content is not valid.');
-    if (!current) throw new HttpError(404, 'File not found.');
-    const old = JSON.parse(decode(current));
-    const lost = Object.keys(old).filter((k) => !(k in next));
-    if (lost.length) throw new HttpError(400, `Some sections are missing (${lost.join(', ')}). Reload the page and try again.`);
-  } else {
-    if (size > MAX_POST_BYTES) throw new HttpError(400, 'That post is too large to save.');
-    let parsed;
-    try { parsed = parseFront(content, path); } catch (e) { throw new HttpError(400, 'The post could not be read.'); }
-    if (!String(parsed.data.title || '').trim()) throw new HttpError(400, 'The post needs a title.');
-  }
-
-  if (current && !sha) throw new HttpError(409, 'A page with this name already exists. Please use a different title.');
-  if (current && sha && current.sha !== sha) throw new HttpError(409, 'This content was changed somewhere else. Please reload the page and try again.');
-  const message = `Admin: ${current ? 'update' : 'add'} ${path.replace(/^content\//, '')}`;
-  const res = await gh(cfg, 'PUT', path, {
-    message,
-    content: Buffer.from(content, 'utf8').toString('base64'),
-    branch: cfg.branch,
-    ...(current ? { sha: current.sha } : {}),
+/* ---- raw Git database calls (used to make ONE commit from many changes) */
+async function git(cfg, method, sub, body) {
+  const res = await fetch(`${cfg.api}/repos/${cfg.repo}/${sub}`, {
+    method,
+    headers: {
+      Authorization: `Bearer ${cfg.token}`,
+      Accept: 'application/vnd.github+json',
+      'X-GitHub-Api-Version': '2022-11-28',
+      'User-Agent': 'gamaliel-site-admin',
+      ...(body ? { 'Content-Type': 'application/json' } : {}),
+    },
+    body: body ? JSON.stringify(body) : undefined,
   });
-  return json(200, { sha: res.content.sha });
+  const data = await res.json().catch(() => ({}));
+  if (res.status === 401 || res.status === 403) throw new HttpError(502, 'GitHub refused the request. Check that GITHUB_TOKEN is valid and has "Contents: Read and write" access to the repository.');
+  if (res.status === 409 || res.status === 422) throw new HttpError(409, 'Someone else saved changes at the same moment. Please try again.');
+  if (!res.ok) throw new HttpError(502, `GitHub error (${res.status}). ${data.message || ''}`.trim());
+  return data;
 }
 
-async function deleteFile(cfg, body) {
-  const { path, sha } = body;
-  if (kindOf(path) !== 'post') throw new HttpError(400, 'Only blog posts can be deleted.');
-  const current = await gh(cfg, 'GET', path);
-  if (!current) throw new HttpError(404, 'Post not found.');
-  if (!sha || current.sha !== sha) throw new HttpError(409, 'This post was changed somewhere else. Please reload the page and try again.');
-  await gh(cfg, 'DELETE', path, { message: `Admin: delete ${path.replace(/^content\//, '')}`, sha: current.sha, branch: cfg.branch });
-  return json(200, { ok: true });
-}
+const IMAGE_PATH = /^images\/uploads\/[a-z0-9][a-z0-9-]{0,80}\.(jpg|png|webp)$/;
 
-async function upload(cfg, body) {
+/* Photos are sent one at a time as unattached blobs (no deploy is triggered by this). */
+async function blob(cfg, body) {
   const data = String(body.data || '');
   if (!data || data.length > MAX_IMAGE_B64) throw new HttpError(400, 'That photo is too large. Please choose a smaller one.');
   const buf = Buffer.from(data, 'base64');
-  const ext = sniffImage(buf);
-  if (!ext) throw new HttpError(400, 'Please upload a JPG, PNG or WebP photo.');
-  const base = String(body.name || 'photo').toLowerCase().replace(/\.[a-z0-9]+$/, '').replace(/[^a-z0-9]+/g, '-').replace(/^-|-$/g, '').slice(0, 40) || 'photo';
-  const stamp = new Date().toISOString().replace(/[-:T.Z]/g, '').slice(0, 14);
-  const path = `images/uploads/${stamp}-${base}.${ext}`;
-  await gh(cfg, 'PUT', path, { message: `Admin: upload ${path.replace(/^images\/uploads\//, '')}`, content: buf.toString('base64'), branch: cfg.branch });
-  return json(200, { path });
+  if (!sniffImage(buf)) throw new HttpError(400, 'Please upload a JPG, PNG or WebP photo.');
+  const res = await git(cfg, 'POST', 'git/blobs', { content: buf.toString('base64'), encoding: 'base64' });
+  return json(200, { sha: res.sha });
+}
+
+/* Everything the admin has saved, published together as a single commit (= a single Netlify build). */
+async function publish(cfg, body) {
+  const changes = body.changes;
+  if (!Array.isArray(changes) || !changes.length) throw new HttpError(400, 'There is nothing to publish.');
+  if (changes.length > 80) throw new HttpError(400, 'Too many changes at once. Please publish in smaller groups.');
+
+  const seen = new Set();
+  const tree = [];
+  const notes = [];
+  const conflicts = [];
+
+  await Promise.all(changes.map(async (c) => {
+    const path = c && c.path;
+    if (seen.has(path)) throw new HttpError(400, 'The same file appears twice.');
+    seen.add(path);
+
+    /* photos */
+    if (typeof path === 'string' && path.startsWith('images/uploads/')) {
+      if (!IMAGE_PATH.test(path) || !/^[0-9a-f]{40}$/.test(String(c.blobSha || ''))) throw new HttpError(400, 'A photo could not be published.');
+      if (await gh(cfg, 'GET', path)) { conflicts.push(path); return; }
+      tree.push({ path, mode: '100644', type: 'blob', sha: c.blobSha });
+      notes.push(`add ${path}`);
+      return;
+    }
+
+    /* content files */
+    const kind = kindOf(path);
+    const current = await gh(cfg, 'GET', path);
+    const base = c.baseSha == null ? null : String(c.baseSha);
+    if (base === null ? current : (!current || current.sha !== base)) { conflicts.push(path); return; }
+
+    if (c.delete) {
+      if (kind !== 'post') throw new HttpError(400, 'Only blog posts can be deleted.');
+      tree.push({ path, mode: '100644', type: 'blob', sha: null });
+      notes.push(`delete ${path}`);
+      return;
+    }
+
+    const content = c.content;
+    if (typeof content !== 'string') throw new HttpError(400, 'Nothing to save.');
+    const size = Buffer.byteLength(content, 'utf8');
+    if (kind === 'json') {
+      if (size > MAX_JSON_BYTES) throw new HttpError(400, 'A page is too large to save.');
+      let next;
+      try { next = JSON.parse(content); } catch (e) { throw new HttpError(400, 'A page could not be read.'); }
+      if (!next || typeof next !== 'object' || Array.isArray(next)) throw new HttpError(400, 'A page could not be read.');
+      const old = JSON.parse(decode(current));
+      const lost = Object.keys(old).filter((k) => !(k in next));
+      if (lost.length) throw new HttpError(400, `Some sections are missing from ${path} (${lost.join(', ')}). Discard your changes to that page and try again.`);
+    } else {
+      if (size > MAX_POST_BYTES) throw new HttpError(400, 'A post is too large to save.');
+      let parsed;
+      try { parsed = parseFront(content, path); } catch (e) { throw new HttpError(400, 'A post could not be read.'); }
+      if (!String(parsed.data.title || '').trim()) throw new HttpError(400, 'Every post needs a title.');
+    }
+    tree.push({ path, mode: '100644', type: 'blob', content });
+    notes.push(`${current ? 'update' : 'add'} ${path}`);
+  }));
+
+  if (conflicts.length) {
+    const err = new HttpError(409, 'Some content was changed somewhere else since you started editing, so nothing was published. Review the items listed, discard your changes to them, and try again.');
+    err.conflicts = conflicts;
+    throw err;
+  }
+
+  const ref = await git(cfg, 'GET', `git/ref/heads/${encodeURIComponent(cfg.branch)}`);
+  const headSha = ref.object.sha;
+  const head = await git(cfg, 'GET', `git/commits/${headSha}`);
+  const newTree = await git(cfg, 'POST', 'git/trees', { base_tree: head.tree.sha, tree });
+  const commit = await git(cfg, 'POST', 'git/commits', {
+    message: `Admin: update website (${changes.length} ${changes.length === 1 ? 'change' : 'changes'})\n\n${notes.sort().map((n) => `- ${n}`).join('\n')}`,
+    tree: newTree.sha,
+    parents: [headSha],
+  });
+  await git(cfg, 'PATCH', `git/refs/heads/${encodeURIComponent(cfg.branch)}`, { sha: commit.sha, force: false });
+  return json(200, { commit: commit.sha, files: changes.length });
 }
 
 /* -------------------------------------------------------------- handler */
@@ -232,13 +285,12 @@ exports.handler = async (event) => {
       case 'me': return json(200, { email: user.e, expires: user.exp });
       case 'list-posts': return await listPosts(cfg);
       case 'get': return await getFile(cfg, body.path);
-      case 'save': return await saveFile(cfg, body);
-      case 'delete': return await deleteFile(cfg, body);
-      case 'upload': return await upload(cfg, body);
+      case 'blob': return await blob(cfg, body);
+      case 'publish': return await publish(cfg, body);
       default: return json(400, { error: 'Unknown request.' });
     }
   } catch (e) {
-    if (e instanceof HttpError) return json(e.status, { error: e.message });
+    if (e instanceof HttpError) return json(e.status, { error: e.message, ...(e.conflicts ? { conflicts: e.conflicts } : {}) });
     console.error('admin function error:', e);
     return json(500, { error: 'Something went wrong. Please try again.' });
   }
